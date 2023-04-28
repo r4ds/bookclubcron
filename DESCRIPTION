@@ -7,11 +7,13 @@ Authors@R:
 Description: Several tasks need to run multiple times per day to keep book
     clubs running.
 License: MIT + file LICENSE
+URL: https://github.com/r4ds/bookclubcron,
+    https://r4ds.github.io/bookclubcron/
+BugReports: https://github.com/r4ds/bookclubcron/issues
 Suggests: 
+    covr,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
-URL: https://github.com/r4ds/bookclubcron
-BugReports: https://github.com/r4ds/bookclubcron/issues
