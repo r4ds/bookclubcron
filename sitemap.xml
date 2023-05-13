@@ -28,6 +28,36 @@
     <loc>https://r4ds.github.io/bookclubcron/reference/bookclubcron-package.html</loc>
   </url>
   <url>
+    <loc>https://r4ds.github.io/bookclubcron/reference/dot-cache_r4ds_slack_channels.html</loc>
+  </url>
+  <url>
+    <loc>https://r4ds.github.io/bookclubcron/reference/dot-cache_r4ds_youtube_playlists.html</loc>
+  </url>
+  <url>
+    <loc>https://r4ds.github.io/bookclubcron/reference/dot-check_can_upload.html</loc>
+  </url>
+  <url>
+    <loc>https://r4ds.github.io/bookclubcron/reference/dot-fetch_r4ds_slack_channels.html</loc>
+  </url>
+  <url>
+    <loc>https://r4ds.github.io/bookclubcron/reference/dot-fetch_r4ds_youtube_playlists.html</loc>
+  </url>
+  <url>
     <loc>https://r4ds.github.io/bookclubcron/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>https://r4ds.github.io/bookclubcron/reference/process_youtube.html</loc>
+  </url>
+  <url>
+    <loc>https://r4ds.github.io/bookclubcron/reference/process_zoom.html</loc>
+  </url>
+  <url>
+    <loc>https://r4ds.github.io/bookclubcron/reference/r4ds_slack_channels.html</loc>
+  </url>
+  <url>
+    <loc>https://r4ds.github.io/bookclubcron/reference/r4ds_youtube_playlists.html</loc>
+  </url>
+  <url>
+    <loc>https://r4ds.github.io/bookclubcron/reference/reset_the.html</loc>
   </url>
 </urlset>
