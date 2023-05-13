@@ -15,12 +15,12 @@ coverage](https://codecov.io/gh/r4ds/bookclubcron/branch/main/graph/badge.svg)](
 <!-- badges: end -->
 
 Several tasks need to run multiple times per day to keep book clubs
-running.
+running. This packages allows me to automate (most of) those tasks.
 
 ## Installation
 
-You can install the development version of bookclubcron from
-[GitHub](https://github.com/) with:
+You can install the development version of bookclubcron (but you
+probably shouldn’t) from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("remotes")
