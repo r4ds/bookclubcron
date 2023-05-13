@@ -19,5 +19,5 @@
 }
 
 do_stuff <- function(...) {
-  cli::cli_abort("This isn't defined.")
+  cli::cli_abort("{log_now()} This isn't defined.")
 }

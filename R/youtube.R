@@ -33,7 +33,7 @@
 
   if (length(monitoring_channel_msgs)) {
     cli::cli_abort(
-      "YouTube quote reached. Process tomorrow!"
+      "{log_now()} YouTube quota reached. Process tomorrow!"
     )
   }
 
@@ -115,13 +115,15 @@ r4ds_youtube_playlists <- function(n = 50L, refresh = FALSE) {
 #' @return I'm not sure yet.
 #' @export
 process_youtube <- function() {
+  # TODO: Consider renaming this to something like "process_uploaded_videos".
+
   working_video_path <- fs::path(
     rappdirs::user_cache_dir("bookclubcron"),
     "youtube_video_status",
     ext = "rds"
   )
   if (!fs::file_exists(working_video_path)) {
-    cli::cli_abort("No working videos!")
+    cli::cli_abort("{log_now()} No working videos!")
   }
   working_yt_videos <- readRDS(working_video_path)
 
@@ -170,18 +172,18 @@ process_youtube <- function() {
         )
 
         vid_url <- glue::glue(
-          "https://studio.youtube.com/video/{this_video$id}/edit"
+          "https://studio.youtube.com/video/{this_video$id}/editor"
         )
 
         if (working_yt_videos$status[[this_row]] == "uploaded") {
-          msg <- "{channel_name} is {.href [editable]({vid_url})}!"
+          msg <- "{log_now()} {channel_name} is {.href [editable]({vid_url})}!"
           cli::cli_inform(msg)
           return(status_tbl)
         }
         if (working_yt_videos$status[[this_row]] == "processed") {
           previous_duration <- working_yt_videos$uploaded_duration[[this_row]]
           if (status_tbl$uploaded_duration < previous_duration) {
-            cli::cli_inform("{channel_name} is {.emph DONE!}")
+            cli::cli_inform("{log_now()} {channel_name} is {.emph DONE!}")
 
             # Make it public.
             youtubeR::yt_videos_update(
@@ -207,7 +209,8 @@ process_youtube <- function() {
               )
             } else {
               cli::cli_warn(c(
-                "!" = "Cannot find channel {channel_name}. Did you change it?",
+                "!" = "{log_now()} Cannot find channel {channel_name}.",
+                "!" = "Did you change it?",
                 "i" = slack_msg
               ))
             }
@@ -218,7 +221,7 @@ process_youtube <- function() {
             return(status_tbl)
           }
           msg <- paste(
-            "{channel_name} is {.href [editable]({vid_url})},",
+            "{log_now()} {channel_name} is {.href [editable]({vid_url})},",
             "or the edit is processing."
           )
           cli::cli_inform(msg)
@@ -226,7 +229,7 @@ process_youtube <- function() {
         # No change so no need to return anything.
         return(NULL)
       }
-      cli::cli_inform("{channel_name} is {.emph not yet processed.}")
+      cli::cli_inform("{log_now()} {channel_name} is {.emph not yet processed.}")
       return(NULL)
     }
   ) |>

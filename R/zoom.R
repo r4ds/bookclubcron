@@ -5,6 +5,8 @@
 #' @return I'm not sure yet.
 #' @export
 process_zoom <- function() {
+  # TODO: Consider renaming this to something like "process_new_meetings".
+
   .check_can_upload()
 
   last_week <- lubridate::today() - lubridate::weeks(1)
@@ -65,7 +67,9 @@ process_zoom <- function() {
         book_abbrev <- stringr::str_remove(
           cohort_id,
           "\\d+$"
-        )
+        ) |>
+          # Some clubs have a break before the number.
+          stringr::str_remove("(_|-)$")
         cohort_number <- stringr::str_extract(
           cohort_id,
           "\\d+$"
@@ -118,7 +122,7 @@ process_zoom <- function() {
                   if (!(cohort_id %in% names(youtube_playlists))) {
                     # TODO: Make this a link to the playlist creator, or consider
                     # doing this automatically.
-                    cli::cli_abort("New playlist! Create {cohort_id}.")
+                    cli::cli_abort("{log_now()} New playlist! Create {cohort_id}.")
                   }
 
                   playlist_id <- youtube_playlists[[cohort_id]]
@@ -172,7 +176,9 @@ process_zoom <- function() {
                     # TODO: Use the bookclub spreadsheets to fill in information
                     # about the video.
                   } else {
-                    cli::cli_alert_warning("The {cohort_id} playlist is empty!")
+                    cli::cli_alert_warning(
+                      "{log_now()} The {cohort_id} playlist is empty!"
+                    )
                     snippet <- list(
                       title = glue::glue("BOOK: Introduction ({cohort_id} 1)"),
                       description = glue::glue(
@@ -287,7 +293,7 @@ process_zoom <- function() {
                 } else {
                   cli::cli_inform(
                     c(
-                      "!" = "Cannot find channel {channel_name}.",
+                      "!" = "{log_now()} Cannot find channel {channel_name}.",
                       ">" = "Is the meeting name weird?"
                     )
                   )
@@ -296,7 +302,7 @@ process_zoom <- function() {
               {
                 cli::cli_inform(
                   c(
-                    "!" = "File skipped.",
+                    "!" = "{log_now()} File skipped.",
                     "i" = "Meeting had file type {this_file$file_type}."
                   )
                 )
@@ -342,7 +348,7 @@ process_zoom <- function() {
           } else {
             cli::cli_inform(
               c(
-                x = "Zoom message not deleted.",
+                x = "{log_now()} Zoom message not deleted.",
                 "!" = "Cannot find channel {channel_name}.",
                 i = "Is the meeting name weird?"
               )
@@ -357,16 +363,18 @@ process_zoom <- function() {
             httr2::req_perform()
         } else {
           cli::cli_alert_info(
-            "{cohort_id} meeting is in progress or processing on Zoom."
+            "{log_now()} {cohort_id} meeting is in progress or processing on Zoom."
           )
         }
       } else {
         cli::cli_alert_info(
-          c("Skipping in-progress meeting.")
+          c("{log_now()} Skipping in-progress meeting.")
         )
       }
     }
   } else {
-    cli::cli_alert_info("No recordings available.")
+    cli::cli_alert_info(
+      "{log_now()} No recordings available."
+    )
   }
 }
