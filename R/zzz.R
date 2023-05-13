@@ -12,10 +12,12 @@
   # Ideally we should also do a quick zoom check here.
 
   the$old_timeout <- options(timeout = 1000)
+  the$old_digits_secs <- options(digits.secs = 0)
 }
 
 .onUnload <- function(lib) {
   options(the$old_timeout)
+  options(the$old_digits_secs)
 }
 
 do_stuff <- function(...) {
