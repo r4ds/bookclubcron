@@ -239,7 +239,7 @@ process_youtube <- function() {
     readRDS(working_video_path) |>
       dplyr::anti_join(yt_video_details, by = "video_id") |>
       dplyr::bind_rows(
-        dplyr::filter(yt_video_details, status != "ready")
+        dplyr::filter(yt_video_details, .data$status != "ready")
       ) |>
       saveRDS(working_video_path)
   }
