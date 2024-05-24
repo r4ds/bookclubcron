@@ -100,6 +100,21 @@ slack_set_token <- function(key_name = "SLACK_API_TOKEN", keyring = NULL) {
   return(invisible(.keyring_try(key_name, keyring = keyring))) # nocov
 }
 
+#' Remove Zoom reminders
+#'
+#' Remove Zoom reminders from Slack channels.
+#'
+#' @inheritParams dslc_slack_channels
+#' @param channel_name The name of the channel from which reminders should be
+#'   removed.
+#' @param min_age_minutes How old messages need to be (in minutes) to be
+#'   cleared.
+#' @param max_msgs_to_check How many messages to fetch to check for Zoom
+#'   reminders.
+#' @param slack_channels A data.frame of Slack channels.
+#'
+#' @return NULL (invisibly)
+#' @keywords internal
 remove_slack_reminders <- function(channel_name,
                                    min_age_minutes = 55,
                                    max_msgs_to_check = Inf,
@@ -230,6 +245,14 @@ dslc_book_club_channels <- function(token = slack_default_token(),
     dplyr::pull(.data$name)
 }
 
+#' Remove Book Club Zoom reminders
+#'
+#' Clear Zoom reminders from Book Club Slack channels.
+#'
+#' @inheritParams remove_slack_reminders
+#'
+#' @return NULL (invisibly)
+#' @export
 remove_all_club_reminders <- function(min_age_minutes = 55,
                                       token = slack_default_token(),
                                       slack_channels = dslc_slack_channels(
