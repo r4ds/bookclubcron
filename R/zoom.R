@@ -19,8 +19,16 @@ process_zoom <- function() {
     httr2::resp_body_json()
 
   if (length(all_recordings$meetings)) {
-    n <- length(r4ds_active_clubs())
-    youtube_playlists <- r4ds_youtube_playlists(n)
+    # active_clubs <- .active_clubs()
+    # n <- length(active_clubs$cohort_id)
+
+    # It doesn't hurt to get extra, but it'd be nice to figure out exactly where
+    # this list *starts*. As of 2023-05-20, the first playlist returned is
+    # rpkgs06, which hasn't gotten a new video since 2023-04-22; many newer
+    # lists didn't make the cut.
+
+    # youtube_playlists <- r4ds_youtube_playlists(n + 5L) # Pad for new clubs.
+    youtube_playlists <- r4ds_youtube_playlists(100L)
     slack_channels <- r4ds_slack_channels()
 
     working_video_dir <- fs::path(
@@ -48,9 +56,9 @@ process_zoom <- function() {
           FALSE, length(this_meeting$recording_files)
         )
 
-        # TODO: cohort_info <- .parse_cohort_info(this_meeting$topic,
-        # meeting_date)
         cohort_id <- this_meeting$topic
+        # TODO: meeting_details <- .cohort_meeting_details(cohort_id,
+        # meeting_date)
 
         if (cohort_id == "do4ds01-proj01") {
           meeting_date_day <- lubridate::day(meeting_date)
@@ -122,20 +130,20 @@ process_zoom <- function() {
           }
 
           .process_zoom_video(
-            mp4_files[[1]],
-            cohort_number,
-            cohort_id,
-            book_abbrev,
-            meeting_start_time,
-            meeting_date,
-            meeting_num,
-            "video",
-            youtube_playlists,
-            channel_name,
-            working_video_dir,
-            working_video_path,
-            start_time,
-            end_time
+            video_recording_file = mp4_files[[1]],
+            cohort_number = cohort_number,
+            cohort_id = cohort_id,
+            book_abbrev = book_abbrev,
+            meeting_start_time = meeting_start_time,
+            meeting_date = meeting_date,
+            meeting_num = meeting_num,
+            file_identifier = "video",
+            youtube_playlists = youtube_playlists,
+            channel_name = channel_name,
+            working_video_dir = working_video_dir,
+            working_video_path = working_video_path,
+            start_time = start_time,
+            end_time = end_time
           )
           this_meeting$ready_to_delete <- TRUE
           # TODO: Log that it's edited already.
@@ -147,18 +155,18 @@ process_zoom <- function() {
               switch(
                 this_file$file_type,
                 MP4 = .process_zoom_video(
-                  this_file,
-                  cohort_number,
-                  cohort_id,
-                  book_abbrev,
-                  meeting_start_time,
-                  meeting_date,
-                  meeting_num,
+                  video_recording_file = this_file,
+                  cohort_number = cohort_number,
+                  cohort_id = cohort_id,
+                  book_abbrev = book_abbrev,
+                  meeting_start_time = meeting_start_time,
+                  meeting_date = meeting_date,
+                  meeting_num = meeting_num,
                   file_identifier = stringr::str_pad(file_num, 2, pad = "0"),
-                  youtube_playlists,
-                  channel_name,
-                  working_video_dir,
-                  working_video_path
+                  youtube_playlists = youtube_playlists,
+                  channel_name = channel_name,
+                  working_video_dir = working_video_dir,
+                  working_video_path = working_video_path
                 ),
                 CHAT = .process_zoom_chat(
                   this_file,

@@ -10,20 +10,15 @@ License: MIT + file LICENSE
 URL: https://github.com/r4ds/bookclubcron,
     https://r4ds.github.io/bookclubcron/
 BugReports: https://github.com/r4ds/bookclubcron/issues
-Suggests: 
-    covr,
-    testthat (>= 3.0.0)
-Config/testthat/edition: 3
-Encoding: UTF-8
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
 Imports: 
     cli,
     dplyr,
     fs,
     glue,
+    googlesheets4,
     httr2,
     lubridate,
+    memoise,
     purrr,
     rappdirs,
     rlang,
@@ -33,13 +28,21 @@ Imports:
     slackthreads,
     stringr,
     tibble,
+    tidyselect,
     withr,
     youtubeR,
     zoomer
+Suggests: 
+    covr,
+    testthat (>= 3.0.0)
 Remotes:
+    jonthegeek/zoomer,
+    kevin-m-kent/youtubeR,
     yonicd/slackcalls,
     yonicd/slackposts,
     yonicd/slackteams,
-    yonicd/slackthreads,
-    kevin-m-kent/youtubeR,
-    jonthegeek/zoomer
+    yonicd/slackthreads
+Config/testthat/edition: 3
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1

@@ -89,8 +89,7 @@ r4ds_youtube_playlists <- function(n = 50L, refresh = FALSE) {
 #' @return A character vector of playlist IDs, with titles as names.
 #' @keywords internal
 .fetch_r4ds_youtube_playlists <- function(n) {
-  # TODO: Once this is implemented in youtubeR, replace this with a call to that
-  # function.
+  # TODO: {youtubeR} endpoint
   raw_playlists <- youtubeR::yt_call_api(
     endpoint = "playlists",
     query = list(
