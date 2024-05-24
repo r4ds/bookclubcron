@@ -8,8 +8,8 @@ process_announcements <- function() {
 
   clubs_tomorrow <- .active_clubs() |>
     dplyr::filter(
-      day_utc == tomorrow_wday_utc,
-      hour_utc == now_hour_utc
+      .data$day_utc == .data$tomorrow_wday_utc,
+      .data$hour_utc == .data$now_hour_utc
     )
 
   clubs_tomorrow |>

@@ -28,6 +28,7 @@ Imports:
     slackthreads,
     stringr,
     tibble,
+    tidyselect,
     withr,
     youtubeR,
     zoomer
