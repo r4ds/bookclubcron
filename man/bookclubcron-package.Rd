@@ -4,7 +4,7 @@
 \name{bookclubcron-package}
 \alias{bookclubcron}
 \alias{bookclubcron-package}
-\title{bookclubcron: Automated Tasks for R4DS Book Clubs}
+\title{bookclubcron: Automated Tasks for DSLC Book Clubs}
 \description{
 Several tasks need to run multiple times per day to keep book clubs running.
 }

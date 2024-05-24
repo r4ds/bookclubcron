@@ -10,6 +10,6 @@
 If there's room, \code{TRUE} invisibly (error otherwise).
 }
 \description{
-Check the "dev-monitoring" R4DS Slack channel for warnings about quota usage.
+Check the "dev-monitoring" DSLC Slack channel for warnings about quota usage.
 }
 \keyword{internal}

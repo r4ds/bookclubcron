@@ -1,5 +1,5 @@
 Package: bookclubcron
-Title: Automated Tasks for R4DS Book Clubs
+Title: Automated Tasks for DSLC Book Clubs
 Version: 0.0.1
 Authors@R: 
     person("Jon", "Harmon", , "jonthegeek@gmail.com", role = c("aut", "cre"),

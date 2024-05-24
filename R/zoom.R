@@ -27,9 +27,9 @@ process_zoom <- function() {
     # rpkgs06, which hasn't gotten a new video since 2023-04-22; many newer
     # lists didn't make the cut.
 
-    # youtube_playlists <- r4ds_youtube_playlists(n + 5L) # Pad for new clubs.
-    youtube_playlists <- r4ds_youtube_playlists(100L)
-    slack_channels <- r4ds_slack_channels()
+    # youtube_playlists <- dslc_youtube_playlists(n + 5L) # Pad for new clubs.
+    youtube_playlists <- dslc_youtube_playlists(100L)
+    slack_channels <- dslc_slack_channels()
 
     working_video_dir <- fs::path(
       rappdirs::user_cache_dir("bookclubcron")
@@ -212,7 +212,7 @@ process_zoom <- function() {
   # Download chats to their folder.
   chat_dir <- fs::path_home(
     "Dropbox (Personal)",
-    "R", "R4DScommunity", "r4ds_bookclub_meetings", "Chats",
+    "R", "dslc-video", "chats",
     cohort_id
   )
 
@@ -373,10 +373,10 @@ process_zoom <- function() {
         title = glue::glue("BOOK: Introduction ({cohort_id} 1)"),
         description = glue::glue(
           "FACILITATOR kicks off a new book club for BOOK by AUTHORS",
-          "on {meeting_date}, to the R4DS {book_abbrev} Book Club.",
+          "on {meeting_date}, to the DSLC {book_abbrev} Book Club.",
           "Cohort {cohort_number}",
-          "\n\nRead along at BOOK_URL",
-          "\nJoin the conversation at r4ds.io/join!",
+          "\n\nRead along at https://DSLC.io/{book_abbrev}",
+          "\nJoin the conversation at https://DSLC.io/join!",
           .sep = " "
         ),
         tags = "rstats"
