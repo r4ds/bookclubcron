@@ -4,10 +4,12 @@
 \alias{dslc_slack_channels}
 \title{Cache or Fetch DSLC Slack channels}
 \usage{
-dslc_slack_channels(refresh = FALSE)
+dslc_slack_channels(refresh = FALSE, token = slack_default_token())
 }
 \arguments{
 \item{refresh}{Get fresh data?}
+
+\item{token}{character, api token issued by slack}
 }
 \value{
 A dataframe with information about DSLC Slack channels.

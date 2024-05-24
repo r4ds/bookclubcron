@@ -13,10 +13,12 @@ BugReports: https://github.com/r4ds/bookclubcron/issues
 Imports: 
     cli,
     dplyr,
+    fastmatch,
     fs,
     glue,
     googlesheets4,
     httr2,
+    keyring,
     lubridate,
     memoise,
     purrr,

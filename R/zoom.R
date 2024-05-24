@@ -119,7 +119,7 @@ process_zoom <- function() {
           end_time <- chat_log |>
             tolower() |>
             # Allow for a few variants of "end".
-            stringr::str_subset("\\s*end|finish|stop")
+            stringr::str_subset("\\s+end|finish|stop($|\\s)")
 
           if (length(end_time)) {
             # If they said "end" more than once, just use the last one.
@@ -466,46 +466,7 @@ process_zoom <- function() {
 .clean_zoom <- function(this_meeting,
                         channel_name,
                         slack_channels) {
-  # Delete the Zoom meeting announcement for this meeting on this day in
-  # Slack.
-  if (channel_name %in% slack_channels$name) {
-    channel_id <- slack_channels$id[slack_channels$name == channel_name]
-    channel_msgs <- slackthreads::conversations(
-      channel_id,
-      max_results = 100,
-      limit = 100
-    )
-
-    zoom_reminder_msgs <- purrr::keep(
-      channel_msgs,
-      \(x) {
-        x[["user"]] == "USLACKBOT" &
-          stringr::str_detect(
-            x[["text"]],
-            "Join Zoom Meeting"
-          )
-      }
-    )
-
-    if (length(zoom_reminder_msgs)) {
-      # We'll clean out ALL of the msgs, in case past ones got stuck.
-      for (zoom_msg in zoom_reminder_msgs) {
-        slackcalls::post_slack(
-          slack_method = "chat.delete",
-          channel = channel_id,
-          ts = zoom_msg$ts
-        )
-      }
-    }
-  } else {
-    cli::cli_alert_danger(
-      c(
-        x = "{log_now()} Zoom message not deleted.",
-        "!" = "Cannot find channel {channel_name}.",
-        i = "Is the meeting name weird?"
-      )
-    )
-  }
+  remove_slack_reminders(channel_name, slack_channels = slack_channels)
 
   # Delete the recording for this meeting.
   httr2::request("https://api.zoom.us/v2/") |>

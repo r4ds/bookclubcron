@@ -2,6 +2,7 @@
 "_PACKAGE"
 
 ## usethis namespace: start
+#' @importFrom fastmatch %fin%
 #' @importFrom rlang %||%
 #' @importFrom rlang .data
 #' @importFrom rlang .env

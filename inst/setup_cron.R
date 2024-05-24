@@ -20,3 +20,19 @@ tasks |>
   dplyr::glimpse() |>
   dplyr::pull("Task To Run")
 
+
+reminder_script <- system.file(
+  "runners",
+  "clear_reminders.R",
+  package = "bookclubcron"
+)
+
+taskscheduler_create(
+  taskname = "dslc_clear_reminders",
+  rscript = reminder_script,
+  schedule = "HOURLY",
+  # schedule = "ONCE",
+  starttime = "15:00",
+  startdate = format(Sys.Date(), "%m/%d/%Y")
+)
+# taskscheduler_delete(taskname = "dslc_clubs")

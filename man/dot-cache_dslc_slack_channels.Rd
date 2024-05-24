@@ -4,7 +4,10 @@
 \alias{.cache_dslc_slack_channels}
 \title{Cache DSLC Slack channels}
 \usage{
-.cache_dslc_slack_channels()
+.cache_dslc_slack_channels(token = slack_default_token())
+}
+\arguments{
+\item{token}{character, api token issued by slack}
 }
 \value{
 A dataframe with information about DSLC Slack channels, invisibly.

@@ -4,7 +4,10 @@
 \alias{.fetch_dslc_slack_channels}
 \title{Fetch DSLC Slack channels}
 \usage{
-.fetch_dslc_slack_channels()
+.fetch_dslc_slack_channels(token = slack_default_token())
+}
+\arguments{
+\item{token}{character, api token issued by slack}
 }
 \value{
 A dataframe with information about DSLC Slack channels.
