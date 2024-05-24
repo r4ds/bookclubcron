@@ -33,7 +33,6 @@ Imports:
     zoomer
 Suggests: 
     covr,
-    taskscheduleR,
     testthat (>= 3.0.0)
 Remotes:
     jonthegeek/zoomer,
