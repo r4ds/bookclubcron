@@ -1,4 +1,7 @@
 .onLoad <- function(lib, pkg) {
+  # Memoise functions that shouldn't change within a session.
+  .active_clubs <<- memoise::memoise(.active_clubs) # nocov
+
   # Authenticate so the user can walk away.
   # youtubeR::yt_authenticate()
 
