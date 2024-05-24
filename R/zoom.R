@@ -27,9 +27,9 @@ process_zoom <- function() {
     # rpkgs06, which hasn't gotten a new video since 2023-04-22; many newer
     # lists didn't make the cut.
 
-    # youtube_playlists <- r4ds_youtube_playlists(n + 5L) # Pad for new clubs.
-    youtube_playlists <- r4ds_youtube_playlists(100L)
-    slack_channels <- r4ds_slack_channels()
+    # youtube_playlists <- dslc_youtube_playlists(n + 5L) # Pad for new clubs.
+    youtube_playlists <- dslc_youtube_playlists(100L)
+    slack_channels <- dslc_slack_channels()
 
     working_video_dir <- fs::path(
       rappdirs::user_cache_dir("bookclubcron")
@@ -119,7 +119,7 @@ process_zoom <- function() {
           end_time <- chat_log |>
             tolower() |>
             # Allow for a few variants of "end".
-            stringr::str_subset("\\s*end|finish|stop")
+            stringr::str_subset("\\s+end|finish|stop($|\\s)")
 
           if (length(end_time)) {
             # If they said "end" more than once, just use the last one.
@@ -212,7 +212,7 @@ process_zoom <- function() {
   # Download chats to their folder.
   chat_dir <- fs::path_home(
     "Dropbox (Personal)",
-    "R", "R4DScommunity", "r4ds_bookclub_meetings", "Chats",
+    "R", "dslc-video", "chats",
     cohort_id
   )
 
@@ -373,10 +373,10 @@ process_zoom <- function() {
         title = glue::glue("BOOK: Introduction ({cohort_id} 1)"),
         description = glue::glue(
           "FACILITATOR kicks off a new book club for BOOK by AUTHORS",
-          "on {meeting_date}, to the R4DS {book_abbrev} Book Club.",
+          "on {meeting_date}, to the DSLC {book_abbrev} Book Club.",
           "Cohort {cohort_number}",
-          "\n\nRead along at BOOK_URL",
-          "\nJoin the conversation at r4ds.io/join!",
+          "\n\nRead along at https://DSLC.io/{book_abbrev}",
+          "\nJoin the conversation at https://DSLC.io/join!",
           .sep = " "
         ),
         tags = "rstats"
@@ -466,46 +466,7 @@ process_zoom <- function() {
 .clean_zoom <- function(this_meeting,
                         channel_name,
                         slack_channels) {
-  # Delete the Zoom meeting announcement for this meeting on this day in
-  # Slack.
-  if (channel_name %in% slack_channels$name) {
-    channel_id <- slack_channels$id[slack_channels$name == channel_name]
-    channel_msgs <- slackthreads::conversations(
-      channel_id,
-      max_results = 100,
-      limit = 100
-    )
-
-    zoom_reminder_msgs <- purrr::keep(
-      channel_msgs,
-      \(x) {
-        x[["user"]] == "USLACKBOT" &
-          stringr::str_detect(
-            x[["text"]],
-            "Join Zoom Meeting"
-          )
-      }
-    )
-
-    if (length(zoom_reminder_msgs)) {
-      # We'll clean out ALL of the msgs, in case past ones got stuck.
-      for (zoom_msg in zoom_reminder_msgs) {
-        slackcalls::post_slack(
-          slack_method = "chat.delete",
-          channel = channel_id,
-          ts = zoom_msg$ts
-        )
-      }
-    }
-  } else {
-    cli::cli_alert_danger(
-      c(
-        x = "{log_now()} Zoom message not deleted.",
-        "!" = "Cannot find channel {channel_name}.",
-        i = "Is the meeting name weird?"
-      )
-    )
-  }
+  remove_slack_reminders(channel_name, slack_channels = slack_channels)
 
   # Delete the recording for this meeting.
   httr2::request("https://api.zoom.us/v2/") |>

@@ -6,11 +6,11 @@
   # youtubeR::yt_authenticate()
 
   # I may not want to do this long-term, since n will eventually matter.
-  # .cache_r4ds_youtube_playlists(n = 50L)
+  # .cache_dslc_youtube_playlists(n = 50L)
 
   # Cache the Slack channels so we can hit them later. This will also make sure
   # we have Slack authentication.
-  # .cache_r4ds_slack_channels()
+  # .cache_dslc_slack_channels()
 
   # Ideally we should also do a quick zoom check here.
 

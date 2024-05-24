@@ -1,11 +1,11 @@
 #' Check YouTube quota space
 #'
-#' Check the "dev-monitoring" R4DS Slack channel for warnings about quota usage.
+#' Check the "dev-monitoring" DSLC Slack channel for warnings about quota usage.
 #'
 #' @return If there's room, `TRUE` invisibly (error otherwise).
 #' @keywords internal
 .check_can_upload <- function() {
-  slack_channels <- r4ds_slack_channels()
+  slack_channels <- dslc_slack_channels()
 
   # Check monitoring channel for quota info.
   monitor_channel_id <- slack_channels$id[
@@ -40,18 +40,18 @@
   return(invisible(TRUE))
 }
 
-#' Cache or Fetch R4DS Slack channels
+#' Cache or Fetch DSLC YouTube Playlists
 #'
-#' Fetch public and private R4DS Slack channel information.
+#' Fetch DSLC YouTube playlist information.
 #'
-#' @inheritParams .fetch_r4ds_youtube_playlists
+#' @inheritParams .fetch_dslc_youtube_playlists
 #' @param refresh Get fresh data?
 #'
-#' @inherit .fetch_r4ds_youtube_playlists return
+#' @inherit .fetch_dslc_youtube_playlists return
 #' @export
-r4ds_youtube_playlists <- function(n = 50L, refresh = FALSE) {
+dslc_youtube_playlists <- function(n = 50L, refresh = FALSE) {
   if (refresh) {
-    .cache_r4ds_youtube_playlists(n)
+    .cache_dslc_youtube_playlists(n)
     return(the$youtube_playlists)
   }
 
@@ -59,36 +59,36 @@ r4ds_youtube_playlists <- function(n = 50L, refresh = FALSE) {
     rlang::env_cache(
       the,
       "youtube_playlists",
-      .fetch_r4ds_youtube_playlists(n)
+      .fetch_dslc_youtube_playlists(n)
     )
   )
 }
 
-#' Cache R4DS YouTube playlists
+#' Cache DSLC YouTube playlists
 #'
-#' Set R4DS YouTube playlists in the package `the` environment.
+#' Set DSLC YouTube playlists in the package `the` environment.
 #'
-#' @inheritParams .fetch_r4ds_youtube_playlists
+#' @inheritParams .fetch_dslc_youtube_playlists
 #'
 #' @return A character vector of playlist IDs, with titles as names, invisibly.
 #' @keywords internal
-.cache_r4ds_youtube_playlists <- function(n) {
+.cache_dslc_youtube_playlists <- function(n) {
   return(
     rlang::env_bind(
       the,
-      youtube_playlists = .fetch_r4ds_youtube_playlists(n)
+      youtube_playlists = .fetch_dslc_youtube_playlists(n)
     )
   )
 }
 
-#' Fetch R4DS YouTube Playlists
+#' Fetch DSLC YouTube Playlists
 #'
 #' @param n How many playlists do we need? This should ideally be equal to the
 #'   number of active clubs.
 #'
 #' @return A character vector of playlist IDs, with titles as names.
 #' @keywords internal
-.fetch_r4ds_youtube_playlists <- function(n) {
+.fetch_dslc_youtube_playlists <- function(n) {
   # TODO: {youtubeR} endpoint
   raw_playlists <- youtubeR::yt_call_api(
     endpoint = "playlists",
@@ -194,7 +194,7 @@ process_youtube <- function() {
                 )
               )
             }
-            slack_channels <- r4ds_slack_channels()
+            slack_channels <- dslc_slack_channels()
 
             slack_msg <- glue::glue(
               "The most recent cohort{cohort_number} meeting: ",

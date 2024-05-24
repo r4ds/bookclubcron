@@ -6,7 +6,7 @@
 # update the spreadsheet if it's wrong, so it can be right when the meeting is
 # posted!
 
-r4ds_active_clubs <- function() {
+dslc_active_clubs <- function() {
   # TODO: Load info about running clubs. Right now we only use the length, and
   # it isn't super important, so just return a long-enough object.
   return(1:50)
