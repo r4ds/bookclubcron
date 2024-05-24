@@ -58,6 +58,12 @@
     <loc>https://r4ds.github.io/bookclubcron/reference/process_zoom.html</loc>
   </url>
   <url>
+    <loc>https://r4ds.github.io/bookclubcron/reference/remove_all_club_reminders.html</loc>
+  </url>
+  <url>
+    <loc>https://r4ds.github.io/bookclubcron/reference/remove_slack_reminders.html</loc>
+  </url>
+  <url>
     <loc>https://r4ds.github.io/bookclubcron/reference/reset_the.html</loc>
   </url>
   <url>
