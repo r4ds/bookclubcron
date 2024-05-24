@@ -125,7 +125,7 @@ remove_slack_reminders <- function(channel_name,
   channel_id <- .slack_channel_name_to_id(channel_name, token, slack_channels)
   old_reminder_messages <- .slack_reminder_messages(
     channel_id,
-    min_age_minutes = 55,
+    min_age_minutes = min_age_minutes,
     max_msgs_to_check = max_msgs_to_check,
     token = token,
     slack_channels = slack_channels
