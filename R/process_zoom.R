@@ -6,17 +6,25 @@
 #' @export
 process_zoom <- function() {
   .check_can_upload()
+  purrr::quietly(youtubeR::yt_authenticate)()
 
   last_week <- lubridate::today() - lubridate::weeks(1)
+  zoom_refresh <- .key_get_chill("zoom-refresh")
+  zoom_token <- zoomer::zoom_authenticate(refresh_token = zoom_refresh)
+
+  zoom_fetch <- function() {
+    httr2::request(
+      "https://api.zoom.us/v2/users/yntI9xIgSRCk0LvDdaAtIg/recordings"
+    ) |>
+      zoomer:::.zoom_req_authenticate(token = zoom_token) |>
+      httr2::req_url_query(from = last_week) |>
+      httr2::req_retry(max_tries = 3) |>
+      httr2::req_perform() |>
+      httr2::resp_body_json()
+  }
 
   # TODO: {zoomer} endpoint.
-  all_recordings <- httr2::request(
-    "https://api.zoom.us/v2/users/yntI9xIgSRCk0LvDdaAtIg/recordings"
-  ) |>
-    zoomer:::.zoom_req_authenticate() |>
-    httr2::req_url_query(from = last_week) |>
-    httr2::req_perform() |>
-    httr2::resp_body_json()
+  all_recordings <- purrr::quietly(zoom_fetch)()$result
 
   if (length(all_recordings$meetings)) {
     # active_clubs <- .active_clubs()
@@ -60,15 +68,6 @@ process_zoom <- function() {
         # TODO: meeting_details <- .cohort_meeting_details(cohort_id,
         # meeting_date)
 
-        if (cohort_id == "do4ds01-proj01") {
-          meeting_date_day <- lubridate::day(meeting_date)
-          if (meeting_date_day > 7 && meeting_date_day < 15) {
-            cohort_id <- "proj01"
-          } else {
-            cohort_id <- "do4ds01"
-          }
-        }
-
         book_abbrev <- stringr::str_remove(
           cohort_id,
           "\\d+$"
@@ -102,12 +101,13 @@ process_zoom <- function() {
             meeting_num,
             "chat",
             channel_name,
-            slack_channels
+            slack_channels,
+            zoom_token = zoom_token
           )
 
           start_time <- chat_log |>
             tolower() |>
-            stringr::str_subset("start|begin")
+            stringr::str_subset("\\:\\t(start|begin)$")
 
           if (length(start_time)) {
             # If "start" showed up more than once, use the first one.
@@ -143,7 +143,8 @@ process_zoom <- function() {
             working_video_dir = working_video_dir,
             working_video_path = working_video_path,
             start_time = start_time,
-            end_time = end_time
+            end_time = end_time,
+            zoom_token = zoom_token
           )
           this_meeting$ready_to_delete <- TRUE
           # TODO: Log that it's edited already.
@@ -166,7 +167,8 @@ process_zoom <- function() {
                   youtube_playlists = youtube_playlists,
                   channel_name = channel_name,
                   working_video_dir = working_video_dir,
-                  working_video_path = working_video_path
+                  working_video_path = working_video_path,
+                  zoom_token = zoom_token
                 ),
                 CHAT = .process_zoom_chat(
                   this_file,
@@ -176,7 +178,8 @@ process_zoom <- function() {
                   meeting_num,
                   stringr::str_pad(file_num, 2, pad = "0"),
                   channel_name,
-                  slack_channels
+                  slack_channels,
+                  zoom_token = zoom_token
                 ),
                 {
                   cli::cli_alert_danger(
@@ -194,7 +197,7 @@ process_zoom <- function() {
         }
 
         if (all(this_meeting$ready_to_delete)) {
-          .clean_zoom(this_meeting, channel_name, slack_channels)
+          .clean_zoom(this_meeting, channel_name, slack_channels, zoom_token)
         }
       }
     }
@@ -208,10 +211,11 @@ process_zoom <- function() {
                                meeting_num,
                                file_identifier,
                                channel_name,
-                               slack_channels) {
+                               slack_channels,
+                               zoom_token = NULL) {
   # Download chats to their folder.
   chat_dir <- fs::path_home(
-    "Dropbox (Personal)",
+    "Dropbox",
     "R", "dslc-video", "chats",
     cohort_id
   )
@@ -233,7 +237,8 @@ process_zoom <- function() {
   )
 
   httr2::request(chat_recording_file$download_url) |>
-    zoomer:::.zoom_req_authenticate() |>
+    zoomer:::.zoom_req_authenticate(token = zoom_token) |>
+    httr2::req_retry(max_tries = 3) |>
     httr2::req_perform() |>
     httr2::resp_body_raw() |>
     writeBin(con = chat_path)
@@ -282,7 +287,8 @@ process_zoom <- function() {
                                 working_video_dir,
                                 working_video_path,
                                 start_time = NULL,
-                                end_time = NULL) {
+                                end_time = NULL,
+                                zoom_token = NULL) {
   # Make sure it's long enough to bother with.
   start_dt <- lubridate::as_datetime(video_recording_file$recording_start)
   end_dt <- lubridate::as_datetime(video_recording_file$recording_end)
@@ -301,21 +307,23 @@ process_zoom <- function() {
     )
 
     httr2::request(video_recording_file$download_url) |>
-      zoomer:::.zoom_req_authenticate() |>
+      zoomer:::.zoom_req_authenticate(token = zoom_token) |>
+      httr2::req_retry(max_tries = 3) |>
       httr2::req_perform() |>
       httr2::resp_body_raw() |>
       writeBin(con = file_path)
 
     # Use previous videos to get details. Note: The first video
     # needs to be uploaded manually.
+    has_playlist <- stringr::str_detect(names(youtube_playlists), cohort_id)
 
-    if (!(cohort_id %in% names(youtube_playlists))) {
+    if (!any(stringr::str_detect(names(youtube_playlists), cohort_id))) {
       # TODO: Make this a link to the playlist creator, or consider
       # doing this automatically.
       cli::cli_abort("{log_now()} New playlist! Create {cohort_id}.")
     }
 
-    playlist_id <- youtube_playlists[[cohort_id]]
+    playlist_id <- youtube_playlists[[which(has_playlist)]]
 
     # Get the most recent video on that playlist. Unfortunately it
     # returns them in order from earliest so I need to get all then
@@ -335,9 +343,7 @@ process_zoom <- function() {
 
     if (length(playlist_items$items)) {
       target_n <- length(playlist_items$items)
-      previous_id <- playlist_items$items[[
-        target_n
-      ]]$contentDetails$videoId
+      previous_id <- playlist_items$items[[target_n]]$contentDetails$videoId
 
       # Translate that to details.
       result <- youtubeR::yt_call_api(
@@ -359,26 +365,17 @@ process_zoom <- function() {
         "defaultLanguage",
         "defaultAudioLanguage"
       )]
-      snippet$description <- paste(
-        "EDITTHIS ",
-        snippet$description
-      )
+      snippet$title <- cohort_id
+      snippet$description <- "EDITTHIS"
       # TODO: Use the bookclub spreadsheets to fill in information
       # about the video.
     } else {
       cli::cli_alert_warning(
-        "{log_now()} The {cohort_id} playlist is empty!"
+        "{log_now()} The {cohort_id} playlist is empty! Add tags!"
       )
       snippet <- list(
-        title = glue::glue("BOOK: Introduction ({cohort_id} 1)"),
-        description = glue::glue(
-          "FACILITATOR kicks off a new book club for BOOK by AUTHORS",
-          "on {meeting_date}, to the DSLC {book_abbrev} Book Club.",
-          "Cohort {cohort_number}",
-          "\n\nRead along at https://DSLC.io/{book_abbrev}",
-          "\nJoin the conversation at https://DSLC.io/join!",
-          .sep = " "
-        ),
+        title = "EDITTHIS",
+        description = "EDITTHIS",
         tags = "rstats"
       )
     }
@@ -465,13 +462,15 @@ process_zoom <- function() {
 
 .clean_zoom <- function(this_meeting,
                         channel_name,
-                        slack_channels) {
+                        slack_channels,
+                        zoom_token = NULL) {
   remove_slack_reminders(channel_name, slack_channels = slack_channels)
 
   # Delete the recording for this meeting.
   httr2::request("https://api.zoom.us/v2/") |>
     httr2::req_url_path_append("meetings", this_meeting$uuid, "recordings") |>
     httr2::req_method("DELETE") |>
-    zoomer:::.zoom_req_authenticate() |>
+    zoomer:::.zoom_req_authenticate(token = zoom_token) |>
+    httr2::req_retry(max_tries = 3) |>
     httr2::req_perform()
 }

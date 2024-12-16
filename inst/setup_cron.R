@@ -6,7 +6,7 @@ taskscheduler_create(
   rscript = clubs_script,
   schedule = "HOURLY",
   # schedule = "ONCE",
-  starttime = "15:30",
+  starttime = "08:30",
   startdate = format(Sys.Date(), "%m/%d/%Y")
 )
 # taskscheduler_delete(taskname = "dslc_clubs")
@@ -32,7 +32,7 @@ taskscheduler_create(
   rscript = reminder_script,
   schedule = "HOURLY",
   # schedule = "ONCE",
-  starttime = "15:00",
+  starttime = "07:00",
   startdate = format(Sys.Date(), "%m/%d/%Y")
 )
 # taskscheduler_delete(taskname = "dslc_clubs")

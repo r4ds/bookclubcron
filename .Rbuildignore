@@ -9,3 +9,4 @@
 ^pkgdown$
 ^README\.Rmd$
 ^R-raw$
+^\.httr-oauth$

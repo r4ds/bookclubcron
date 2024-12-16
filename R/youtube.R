@@ -1,241 +1,70 @@
-#' Check YouTube quota space
-#'
-#' Check the "dev-monitoring" DSLC Slack channel for warnings about quota usage.
-#'
-#' @return If there's room, `TRUE` invisibly (error otherwise).
-#' @keywords internal
-.check_can_upload <- function() {
-  slack_channels <- dslc_slack_channels()
-
-  # Check monitoring channel for quota info.
-  monitor_channel_id <- slack_channels$id[
-    slack_channels$name == "dev-monitoring"
-  ]
-  monitoring_channel_msgs <- slackthreads::conversations(
-    monitor_channel_id,
-    max_results = 2,
-    limit = 2
-  ) |> purrr::keep(
-    \(x) {
-      "bot_id" %in% names(x) &&
-        x[["bot_id"]] == "B055C7R32LV" &&
-        lubridate::as_datetime(as.numeric(x[["ts"]])) > (
-          # This probably needs to be refined. Is the quote the last 24 hours? Per
-          # calendar day?
-          lubridate::now() - lubridate::hours(24)
-        ) &&
-        x[["text"]] != "Test Notification"
-      # Eventually add more info here to check for the alerts I actually care
-      # about, but I need an example to exist to make sure I get that right. This
-      # is the only message this bot can produce right now, though, so no rush.
-    }
-  )
-
-  if (length(monitoring_channel_msgs)) {
-    cli::cli_abort(
-      "{log_now()} YouTube quota reached. Process tomorrow!"
-    )
-  }
-
-  return(invisible(TRUE))
-}
-
-#' Cache or Fetch DSLC YouTube Playlists
-#'
-#' Fetch DSLC YouTube playlist information.
-#'
-#' @inheritParams .fetch_dslc_youtube_playlists
-#' @param refresh Get fresh data?
-#'
-#' @inherit .fetch_dslc_youtube_playlists return
-#' @export
-dslc_youtube_playlists <- function(n = 50L, refresh = FALSE) {
-  if (refresh) {
-    .cache_dslc_youtube_playlists(n)
-    return(the$youtube_playlists)
-  }
-
+.yt_random_video <- function() {
+  playlist_items <- .yt_random_club_playlist_items()
+  this_item_id <- sample(playlist_items, 1)[[1]]$contentDetails$videoId
+  video_snippet <- .yt_video_snippet(this_item_id)
   return(
-    rlang::env_cache(
-      the,
-      "youtube_playlists",
-      .fetch_dslc_youtube_playlists(n)
+    list(
+      video_id = this_item_id,
+      title = video_snippet$title,
+      description = video_snippet$description,
+      video_url = paste0("https://youtu.be/", this_item_id),
+      tags = unlist(video_snippet$tags)
     )
   )
 }
 
-#' Cache DSLC YouTube playlists
-#'
-#' Set DSLC YouTube playlists in the package `the` environment.
-#'
-#' @inheritParams .fetch_dslc_youtube_playlists
-#'
-#' @return A character vector of playlist IDs, with titles as names, invisibly.
-#' @keywords internal
-.cache_dslc_youtube_playlists <- function(n) {
-  return(
-    rlang::env_bind(
-      the,
-      youtube_playlists = .fetch_dslc_youtube_playlists(n)
-    )
-  )
+.yt_random_club_playlist_items <- function() {
+  playlist_items <- list()
+  i <- 1L
+  while (!length(playlist_items) && i < 11) {
+    i <- i + 1L
+    this_playlist <- .yt_random_club_playlist()
+    playlist_items <- .yt_playlist_videos(this_playlist)
+  }
+  if (length(playlist_items)) {
+    return(playlist_items)
+  }
+  cli::cli_abort("No club playlist items found.")
 }
 
-#' Fetch DSLC YouTube Playlists
-#'
-#' @param n How many playlists do we need? This should ideally be equal to the
-#'   number of active clubs.
-#'
-#' @return A character vector of playlist IDs, with titles as names.
-#' @keywords internal
-.fetch_dslc_youtube_playlists <- function(n) {
-  # TODO: {youtubeR} endpoint
-  raw_playlists <- youtubeR::yt_call_api(
-    endpoint = "playlists",
+.yt_random_club_playlist <- function() {
+  youtube_playlists <- list()
+  i <- 1L
+  while (!length(youtube_playlists) && i < 11) {
+    i <- i + 1L
+    youtube_playlists <- .yt_club_playlists()
+  }
+  if (length(youtube_playlists)) {
+    return(sample(youtube_playlists, 1))
+  }
+  cli::cli_abort("No club playlists found.")
+}
+
+.yt_club_playlists <- function() {
+  youtube_playlists <- dslc_youtube_playlists(500L)
+
+  # Get rid of non-club playlists
+  youtube_playlists[stringr::str_detect(names(youtube_playlists), "\\(\\w+\\)")]
+}
+
+.yt_playlist_videos <- function(playlist_id) {
+  # TODO: Cache this like dslc_youtube_playlists()
+  youtubeR::yt_call_api(
+    endpoint = "playlistItems",
     query = list(
-      part = "snippet",
-      mine = TRUE,
-      maxResults = n
-    )
-  )$items
-
-  return(
-    rlang::set_names(
-      purrr::map_chr(raw_playlists, "id"),
-      purrr::map_chr(raw_playlists, list("snippet", "title"))
-    )
-  )
-}
-
-#' Process YouTube videos
-#'
-#' Update YouTube videos, post them to Slack, etc.
-#'
-#' @return I'm not sure yet.
-#' @export
-process_youtube <- function() {
-  working_video_path <- fs::path(
-    rappdirs::user_cache_dir("bookclubcron"),
-    "youtube_video_status",
-    ext = "rds"
-  )
-  if (!fs::file_exists(working_video_path)) {
-    cli::cli_abort("{log_now()} No working videos!")
-  }
-  working_yt_videos <- readRDS(working_video_path)
-
-  # TODO: {youtubeR} endpoint
-  yt_video_details_raw <- youtubeR::yt_call_api(
-    endpoint = "videos",
-    query = list(
-      id = paste(working_yt_videos$video_id, collapse = ","),
-      part = "contentDetails,status",
+      playlist_id = playlist_id,
+      part = "contentDetails",
       max_results = 50L
     )
   )$items
+}
 
-  # Deal with deleted videos (this almost definitely means there was an extra
-  # recording for a meeting).
-  if (length(yt_video_details_raw) < length(working_yt_videos$video_id)) {
-    returned_video_ids <- purrr::map_chr(yt_video_details_raw, "id")
-    # Don't do a "keep the ones that are here" in case something new saved.
-    # Instead filter out the known missing one(s).
-    missing_videos <- setdiff(
-      working_yt_videos$video_id,
-      returned_video_ids
+.yt_video_snippet <- function(video_id) {
+  youtubeR::yt_call_api(
+    endpoint = "videos",
+    query = list(
+      part = "snippet",
+      id = video_id
     )
-    readRDS(working_video_path) |>
-      dplyr::filter(!(.data$video_id %in% .env$missing_videos)) |>
-      saveRDS(working_video_path)
-  }
-
-  yt_video_details <- purrr::map(
-    yt_video_details_raw,
-    \(this_video) {
-      this_row <- which(working_yt_videos$video_id == this_video$id)
-      channel_name <- working_yt_videos$channel_name[[this_row]]
-
-      if (this_video$status$uploadStatus == "processed") {
-        cohort_number <- working_yt_videos$cohort_number[[this_row]]
-
-        status_tbl <- tibble::tibble(
-          channel_name = .env$channel_name,
-          cohort_number = .env$cohort_number,
-          video_id = this_video$id,
-          uploaded_duration = lubridate::duration(
-            this_video$contentDetails$duration
-          ),
-          status = "processed"
-        )
-
-        vid_url <- glue::glue(
-          "https://studio.youtube.com/video/{this_video$id}/editor"
-        )
-
-        if (working_yt_videos$status[[this_row]] == "uploaded") {
-          msg <- "{log_now()} {channel_name} is {.href [editable]({vid_url})}!"
-          cli::cli_alert_info(msg)
-          return(status_tbl)
-        }
-        if (working_yt_videos$status[[this_row]] == "processed") {
-          previous_duration <- working_yt_videos$uploaded_duration[[this_row]]
-          if (
-            status_tbl$uploaded_duration < previous_duration ||
-            this_video$status$privacyStatus == "public"
-          ) {
-            cli::cli_alert_info("{log_now()} {channel_name} is {.emph DONE!}")
-
-            if (this_video$status$privacyStatus != "public") {
-              # Make it public.
-              youtubeR::yt_videos_update(
-                video_id = this_video$id,
-                status = youtubeR::yt_schema_video_status(
-                  privacy_status = "public"
-                )
-              )
-            }
-            slack_channels <- dslc_slack_channels()
-
-            slack_msg <- glue::glue(
-              "The most recent cohort{cohort_number} meeting: ",
-              "https://youtu.be/{this_video$id}"
-            )
-
-            if (channel_name %in% slack_channels$name) {
-              slackposts::chat_message(
-                channel = slack_channels$id[
-                  slack_channels$name == channel_name
-                ],
-                text = slack_msg
-              )
-            } else {
-              cli::cli_alert_warning(c(
-                "!" = "{log_now()} Cannot find channel {channel_name}.",
-                "!" = "Did you change it?",
-                "i" = slack_msg
-              ))
-            }
-
-            status_tbl$processed_duration <- status_tbl$uploaded_duration
-            status_tbl$uploaded_duration <- NULL
-            status_tbl$status <- "ready"
-            return(status_tbl)
-          }
-        }
-        # No change so no need to return anything.
-        return(NULL)
-      }
-      return(NULL)
-    }
-  ) |>
-    purrr::list_rbind()
-
-  if (nrow(yt_video_details)) {
-    readRDS(working_video_path) |>
-      dplyr::anti_join(yt_video_details, by = "video_id") |>
-      dplyr::bind_rows(
-        dplyr::filter(yt_video_details, .data$status != "ready")
-      ) |>
-      saveRDS(working_video_path)
-  }
+  )$items[[1]]$snippet
 }

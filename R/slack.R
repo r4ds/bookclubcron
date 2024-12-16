@@ -258,6 +258,7 @@ remove_all_club_reminders <- function(min_age_minutes = 55,
                                       slack_channels = dslc_slack_channels(
                                         token = token
                                       )) {
+  cli::cli_inform(paste(log_now(), "Removing reminders."))
   club_channels <- dslc_book_club_channels(
     token = token,
     slack_channels = slack_channels
@@ -270,4 +271,5 @@ remove_all_club_reminders <- function(min_age_minutes = 55,
       slack_channels = slack_channels
     )
   }
+  cli::cli_inform(paste(log_now(), "Finished removing reminders."))
 }
