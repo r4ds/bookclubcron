@@ -35,10 +35,9 @@ li_message_randoms <- function(...) {
 .li_video_message <- function(video) {
   bullets <- .tags_to_bullets(video$tags)
   hashtags <- .tags_to_hashtags(video$tags)
-  glue::glue(
-    glue::glue_collapse(bullets, sep = " "),
-    '"{video$title}" {video$video_url}',
-    glue::glue_collapse(hashtags, sep = " "),
-    .sep = " "
+  .glue_special(
+    glue::glue_collapse(bullets),
+    '"{{video$title}}" {{video$video_url}}',
+    glue::glue_collapse(hashtags, sep = " ")
   )
 }

@@ -16,3 +16,16 @@ log_now <- function() {
     }
   )
 }
+
+.glue_special <- function(...,
+                          .sep = " ",
+                          .open = "{{",
+                          .close = "}}",
+                          .envir = rlang::caller_env()) {
+  return(
+    glue::glue(
+      ..., .sep = .sep, .open = .open, .close = .close,
+      .envir = .envir
+    )
+  )
+}

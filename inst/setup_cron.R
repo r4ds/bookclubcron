@@ -1,6 +1,9 @@
 library(taskscheduleR)
-clubs_script <- system.file("runners", "clubs.R", package = "bookclubcron")
 
+# taskscheduler_delete(taskname = "dslc_clubs")
+# taskscheduler_delete(taskname = "dslc_clear_reminders")
+
+clubs_script <- system.file("runners", "clubs.R", package = "bookclubcron")
 taskscheduler_create(
   taskname = "dslc_clubs",
   rscript = clubs_script,
@@ -9,7 +12,6 @@ taskscheduler_create(
   starttime = "08:30",
   startdate = format(Sys.Date(), "%m/%d/%Y")
 )
-# taskscheduler_delete(taskname = "dslc_clubs")
 
 
 tasks <- taskscheduler_ls() |>
@@ -32,7 +34,6 @@ taskscheduler_create(
   rscript = reminder_script,
   schedule = "HOURLY",
   # schedule = "ONCE",
-  starttime = "07:00",
+  starttime = "09:00",
   startdate = format(Sys.Date(), "%m/%d/%Y")
 )
-# taskscheduler_delete(taskname = "dslc_clubs")

@@ -15,10 +15,10 @@
 .social_message_minimize <- function(msgs) {
   msgs <-
     msgs |>
-    stringr::str_remove(r"(Chapter \d+)") |>
-    stringr::str_remove(r"(Ch \d+\&\d+)") |>
-    stringr::str_remove(r"(Ch \d+)") |>
-    stringr::str_replace(r"(: \d+)", ":") |>
+    stringr::str_remove(r"(Chapter \d{1,2})") |>
+    stringr::str_remove(r"(Ch \d{1,2}\&\d{1,2})") |>
+    stringr::str_remove(r"(Ch \d{1,2})") |>
+    stringr::str_replace(r"(: \d{1,2})", ":") |>
     stringr::str_remove_all('"') |>
     stringr::str_remove_all(r"(\(\d{4}-\d{2}-\d{2}\))") |>
     stringr::str_remove_all(r"(\([a-z0-9_]+\d{2}( \d+)*\))") |>
@@ -38,7 +38,9 @@
 .extract_hashtags <- function(msgs) {
   hashtags <- stringr::str_extract_all(msgs, "#[a-zA-Z0-9]+")
   msgs <- stringr::str_remove_all(msgs, "#[a-zA-Z0-9]+")
-  attr(msgs, "hashtags") <- .clean_hashtags(hashtags)
+  if (length(unlist(hashtags))) {
+    attr(msgs, "hashtags") <- .clean_hashtags(hashtags)
+  }
   return(msgs)
 }
 

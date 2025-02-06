@@ -42,11 +42,10 @@ mast_message_randoms <- function(...) {
   icons <- .tags_to_icons(video$tags)
   hashtags <- .tags_to_hashtags(video$tags)
   title <- .social_message_minimize(video$title)
-  glue::glue(
+  .glue_special(
     glue::glue_collapse(icons, sep = " "),
-    '"{title}" {video$video_url}',
-    glue::glue_collapse(hashtags, sep = " "),
-    .sep = " "
+    '"{{title}}" {{video$video_url}}',
+    glue::glue_collapse(hashtags, sep = " ")
   )
 }
 
@@ -64,7 +63,8 @@ mast_message_randoms <- function(...) {
     rust = "rust"
   )
   lang_tags <- tags[tolower(tags) %in% names(known_language_tags)]
+  tags_for_icons <- unique(known_language_tags[tolower(lang_tags)])
   return(
-    paste0(":", known_language_tags[tolower(lang_tags)], ":")
+    paste0(":", tags_for_icons, ":")
   )
 }

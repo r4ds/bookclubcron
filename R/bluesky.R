@@ -48,10 +48,9 @@ bsky_message_randoms <- function(...) {
 .bsky_video_message <- function(video) {
   bullets <- .tags_to_bullets(video$tags)
   title <- .social_message_minimize(video$title)
-  msg <- glue::glue(
+  msg <- .glue_special(
     glue::glue_collapse(bullets, sep = " "),
-    "{title} {video$video_url}",
-    .sep = " "
+    "{{title}} {{video$video_url}}"
   )
   attr(msg, "hashtags") <- .tags_to_hashtags(video$tags)
   return(msg)

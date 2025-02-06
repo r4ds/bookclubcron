@@ -107,7 +107,7 @@ process_zoom <- function() {
 
           start_time <- chat_log |>
             tolower() |>
-            stringr::str_subset("\\:\\t(start|begin)$")
+            stringr::str_subset("\\:\\t(start|begin)\\s*$")
 
           if (length(start_time)) {
             # If "start" showed up more than once, use the first one.
@@ -118,6 +118,8 @@ process_zoom <- function() {
           }
           end_time <- chat_log |>
             tolower() |>
+            # Only get lines that have a timestamp (lines not in a code block).
+            stringr::str_subset("^\\d{2}:\\d{2}:\\d{2}") |>
             # Allow for a few variants of "end".
             stringr::str_subset("\\s+end|finish|stop($|\\s)")
 
@@ -214,10 +216,11 @@ process_zoom <- function() {
                                slack_channels,
                                zoom_token = NULL) {
   # Download chats to their folder.
+  cohort_id_for_path <- stringr::str_remove_all(cohort_id, "[^A-Za-z0-9_ ]")
   chat_dir <- fs::path_home(
     "Dropbox",
     "R", "dslc-video", "chats",
-    cohort_id
+    cohort_id_for_path
   )
 
   # fs is nice enough to create if it doesn't exist and leave it alone
@@ -227,7 +230,7 @@ process_zoom <- function() {
   chat_path <- fs::path(
     chat_dir,
     paste(
-      cohort_id,
+      cohort_id_for_path,
       meeting_date,
       stringr::str_pad(meeting_num, 2, pad = "0"),
       file_identifier,
@@ -317,7 +320,7 @@ process_zoom <- function() {
     # needs to be uploaded manually.
     has_playlist <- stringr::str_detect(names(youtube_playlists), cohort_id)
 
-    if (!any(stringr::str_detect(names(youtube_playlists), cohort_id))) {
+    if (!any(has_playlist)) {
       # TODO: Make this a link to the playlist creator, or consider
       # doing this automatically.
       cli::cli_abort("{log_now()} New playlist! Create {cohort_id}.")

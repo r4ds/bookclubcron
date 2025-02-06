@@ -149,7 +149,7 @@ remove_slack_reminders <- function(channel_name,
   .filter_slack_messages(
     channel_messages,
     user = "USLACKBOT",
-    text = "Join Zoom Meeting",
+    text = "dial in with your local number",
     min_age_minutes = min_age_minutes
   )
 }
