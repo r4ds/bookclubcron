@@ -107,11 +107,13 @@ process_zoom <- function() {
 
           start_time <- chat_log |>
             tolower() |>
+            # Only get lines that have a timestamp (lines not in a code block).
+            stringr::str_subset("^\\d{2}:\\d{2}:\\d{2}") |>
             stringr::str_subset("\\:\\t(start|begin)\\s*$")
 
           if (length(start_time)) {
             # If "start" showed up more than once, use the first one.
-            start_time <- start_time[[1]] |>
+            start_time <- start_time[[length(start_time)]] |>
               stringr::str_extract("^\\d{2}:\\d{2}:\\d{2}")
           } else {
             start_time <- "00:00:00"
@@ -121,12 +123,17 @@ process_zoom <- function() {
             # Only get lines that have a timestamp (lines not in a code block).
             stringr::str_subset("^\\d{2}:\\d{2}:\\d{2}") |>
             # Allow for a few variants of "end".
-            stringr::str_subset("\\s+end|finish|stop($|\\s)")
+            stringr::str_subset("\\s+end|finish|stop($|\\s)") |>
+            stringr::str_extract("^\\d{2}:\\d{2}:\\d{2}")
+
+          # Get rid of ends that are after start.
+          end_time <- end_time[
+            lubridate::hms(end_time) > lubridate::hms(start_time)
+          ]
 
           if (length(end_time)) {
             # If they said "end" more than once, just use the last one.
-            end_time <- end_time[length(end_time)] |>
-              stringr::str_extract("^\\d{2}:\\d{2}:\\d{2}")
+            end_time <- end_time[length(end_time)]
           } else {
             end_time <- NULL
           }
@@ -297,7 +304,10 @@ process_zoom <- function() {
   end_dt <- lubridate::as_datetime(video_recording_file$recording_end)
   duration <- end_dt - start_dt
 
-  if (duration > lubridate::minutes(10)) {
+  if (
+    duration > lubridate::minutes(10) ||
+    (length(start_time) && start_time != "00:00:00")
+  ) {
     file_path <- withr::local_tempfile(
       pattern = paste(
         cohort_id,
@@ -343,6 +353,12 @@ process_zoom <- function() {
     # TODO: A deleted video was on a playlist, and it was hard to
     # tell that's what had happened! At a minimum we should check
     # for contentDetails$videoPublishedAt to make sure it's real.
+    playlist_items$items <- purrr::keep(
+      playlist_items$items,
+      \(item) {
+        !is.null(item$contentDetails$videoPublishedAt)
+      }
+    )
 
     if (length(playlist_items$items)) {
       target_n <- length(playlist_items$items)
@@ -470,10 +486,27 @@ process_zoom <- function() {
   remove_slack_reminders(channel_name, slack_channels = slack_channels)
 
   # Delete the recording for this meeting.
-  httr2::request("https://api.zoom.us/v2/") |>
-    httr2::req_url_path_append("meetings", this_meeting$uuid, "recordings") |>
-    httr2::req_method("DELETE") |>
-    zoomer:::.zoom_req_authenticate(token = zoom_token) |>
-    httr2::req_retry(max_tries = 3) |>
-    httr2::req_perform()
+  req <- httr2::request("https://api.zoom.us/v2/") |>
+    httr2::req_url_path_append("meetings", this_meeting$uuid, "recordings")
+
+  tryCatch({
+    req |>
+      httr2::req_method("DELETE") |>
+      zoomer:::.zoom_req_authenticate(token = zoom_token) |>
+      httr2::req_retry(max_tries = 3) |>
+      httr2::req_perform()
+  }, error = function(e) {
+    # Sometimes Zoom randomly puts a "/" in the uuid, which evidently doesn't work
+    # in its DELETE API. I should alert myself about those, but that's convoluted
+    # right now, so at least put something in the log.
+    cli::cli_warn(c(
+      "!",
+      "!",
+      "!",
+      "BAD UUID! MANUALLY DELETE!",
+      "!",
+      "!",
+      "!"
+    ))
+  })
 }

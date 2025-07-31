@@ -11,7 +11,7 @@ li_message_randoms <- function(...) {
   }
   msg_end <- .social_message_end()
   new_msg <- .li_message_archive_start()
-  n_randoms <- 5L - length(new_msgs)
+  n_randoms <- max(5L - length(new_msgs), 0L)
   for (i in seq_len(n_randoms)) {
     msg <- .social_message_compile(msg, new_msg)
     new_msg <- .li_random_video_message()
@@ -37,7 +37,7 @@ li_message_randoms <- function(...) {
   hashtags <- .tags_to_hashtags(video$tags)
   .glue_special(
     glue::glue_collapse(bullets),
-    '"{{video$title}}" {{video$video_url}}',
+    "{{video$title}} {{video$video_url}}",
     glue::glue_collapse(hashtags, sep = " ")
   )
 }

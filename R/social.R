@@ -60,7 +60,7 @@
   if ("databs" %in% names(tags)) {
     tags[["databs"]] <- "dataBS"
   }
-  return(unname(tags))
+  return(unique(unname(tags)))
 }
 
 .clean_hashtags <- function(hashtags) {

@@ -105,7 +105,8 @@ process_clubs_manual <- function(max_hours = 29, min_hours = 2) {
           janitor::clean_names() |>
           dplyr::filter(
             date <= lubridate::today(),
-            !is.na(full_you_tube_description)
+            !is.na(.data$full_you_tube_description),
+            !is.na(.data$you_tube_link)
           ) |>
           dplyr::arrange(dplyr::desc(date)) |>
           head(1)
@@ -134,17 +135,19 @@ process_clubs_manual <- function(max_hours = 29, min_hours = 2) {
     mast_bullets <- NULL
   }
 
-  cli::cli_inform("\n\n\nMASTODON")
-  cli::cli_inform(mast_message_randoms(mast_bullets))
-  cli::cli_inform("\n\n\nBLUESKY")
-  cli::cli_inform(bsky_message_randoms(bsky_bullets))
-  cli::cli_inform("\n\n")
-  cli::cli_inform(bsky_message_randoms())
-  cli::cli_inform("\n\n\nLINKEDIN")
-  cli::cli_inform(li_message_randoms(li_bullets))
+  rlang::inform("\n\n\nMASTODON")
+  rlang::inform(mast_message_randoms(mast_bullets))
+  rlang::inform("\n\n\nBLUESKY")
+  rlang::inform(bsky_message_randoms(bsky_bullets))
+  rlang::inform("\n\n")
+  rlang::inform(bsky_message_randoms())
+  rlang::inform("\n\n\nLINKEDIN")
+  rlang::inform(li_message_randoms(li_bullets))
   return(invisible(NULL))
 }
 
 process_clubs_manual()
+# process_clubs_manual(1,1)
+# process_clubs_manual(96,1)
 
 rm(process_clubs_manual)

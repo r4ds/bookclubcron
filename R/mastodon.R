@@ -44,7 +44,7 @@ mast_message_randoms <- function(...) {
   title <- .social_message_minimize(video$title)
   .glue_special(
     glue::glue_collapse(icons, sep = " "),
-    '"{{title}}" {{video$video_url}}',
+    "{{title}} {{video$video_url}}",
     glue::glue_collapse(hashtags, sep = " ")
   )
 }
