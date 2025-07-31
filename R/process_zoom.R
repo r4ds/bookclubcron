@@ -191,7 +191,7 @@ process_zoom <- function() {
                   zoom_token = zoom_token
                 ),
                 {
-                  cli::cli_alert_danger(
+                  cli::cli_warn(
                     c(
                       "x" = "{log_now()} File skipped.",
                       "i" = "Meeting had file type {this_file$file_type}."
@@ -272,7 +272,7 @@ process_zoom <- function() {
       )
     )
   } else {
-    cli::cli_alert_warning(
+    cli::cli_warn(
       c(
         "!" = "{log_now()} Cannot find channel {channel_name}.",
         ">" = "Is the meeting name weird?"
@@ -389,7 +389,7 @@ process_zoom <- function() {
       # TODO: Use the bookclub spreadsheets to fill in information
       # about the video.
     } else {
-      cli::cli_alert_warning(
+      cli::cli_warn(
         "{log_now()} The {cohort_id} playlist is empty! Add tags!"
       )
       snippet <- list(

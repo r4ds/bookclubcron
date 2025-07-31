@@ -178,8 +178,8 @@ process_youtube <- function() {
         )
 
         if (working_yt_videos$status[[this_row]] == "uploaded") {
-          msg <- "{log_now()} {channel_name} is {.href [editable]({vid_url})}!"
-          cli::cli_alert_info(msg)
+          # msg <- "{log_now()} {channel_name} is {.href [editable]({vid_url})}!"
+          # cli::cli_inform(msg)
           return(status_tbl)
         }
         if (working_yt_videos$status[[this_row]] == "processed") {
@@ -188,7 +188,7 @@ process_youtube <- function() {
             status_tbl$uploaded_duration < previous_duration ||
             this_video$status$privacyStatus == "public"
           ) {
-            cli::cli_alert_info("{log_now()} {channel_name} is {.emph DONE!}")
+            # cli::cli_inform("{log_now()} {channel_name} is {.emph DONE!}")
 
             if (this_video$status$privacyStatus != "public") {
               # Make it public.
@@ -214,7 +214,7 @@ process_youtube <- function() {
                 text = slack_msg
               )
             } else {
-              cli::cli_alert_warning(c(
+              cli::cli_warn(c(
                 "!" = "{log_now()} Cannot find channel {channel_name}.",
                 "!" = "Did you change it?",
                 "i" = slack_msg
