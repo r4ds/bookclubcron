@@ -1,8 +1,13 @@
 .social_message_compile <- function(...) {
   msgs <- .discard_empty(...)
   if (length(msgs)) {
+    # Merge then de-duplicate.
+    msg_joined <- paste(msgs, collapse = "\n\n")
+    msg_resplit <- unique(
+      .discard_empty(stringr::str_split_1(msg_joined, "\\n"))
+    )
     return(
-      paste(msgs, collapse = "\n\n")
+      paste(msg_resplit, collapse = "\n\n")
     )
   }
   return(character())

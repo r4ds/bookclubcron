@@ -9,14 +9,14 @@ mast_message_randoms <- function(...) {
     )
   }
   msg_end <- .social_message_end()
-  new_msg <- .social_message_compile(
+  potential_msg <- .social_message_compile(
     .mast_message_archive_start(),
     .mast_random_video_message()
   )
-  while (.sum_nchar(msg, new_msg, msg_end) + 1 < 500) {
-    msg <- .social_message_compile(msg, new_msg)
+  while (.sum_nchar(msg, potential_msg, msg_end) + 1 < 500) {
+    msg <- .social_message_compile(msg, potential_msg)
     video <- .yt_random_video()
-    new_msg <- .mast_video_message(video)
+    potential_msg <- .mast_video_message(video)
   }
   return(
     glue::as_glue(.social_message_compile(msg, msg_end))
