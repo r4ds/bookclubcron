@@ -104,7 +104,7 @@ process_clubs_manual <- function(max_hours = 29, min_hours = 2) {
         ) |>
           janitor::clean_names() |>
           dplyr::filter(
-            date <= lubridate::today(),
+            date == yesterday_clubs$date_chicago[[club_n]],
             !is.na(.data$full_you_tube_description),
             !is.na(.data$you_tube_link)
           ) |>
