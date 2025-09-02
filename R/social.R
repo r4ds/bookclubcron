@@ -30,7 +30,7 @@
     stringr::str_remove_all(r"(\([a-z0-9_]+\d{2} extra\))") |>
     stringr::str_replace("Book Club\\s*:", ":") |>
     stringr::str_replace_all(" :", ":") |>
-    stringr::str_replace_all("::", ":") |>
+    stringr::str_replace_all(":: ", ": ") |>
     stringr::str_squish()
   return(msgs)
 }
