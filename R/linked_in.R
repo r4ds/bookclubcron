@@ -1,6 +1,7 @@
 li_message_randoms <- function(...) {
   msg <- character()
   new_msgs <- .discard_empty(...)
+  msg_log <- new_msgs
   if (length(new_msgs)) {
     msg <- .social_message_compile(
       # TODO: Create LI-specific function that inserts @ for DSLC.
@@ -15,9 +16,13 @@ li_message_randoms <- function(...) {
   for (i in seq_len(n_randoms)) {
     msg <- .social_message_compile(msg, new_msg)
     new_msg <- .li_random_video_message()
+    msg_log <- c(msg_log, new_msg)
   }
+  # Tack the first msg onto the end so LinkedIn shows it as the video preview.
+  # Hopefully we can fix this when we implement the API.
+  last_msg <- paste("For preview:", msg_log[[1]])
   return(
-    glue::as_glue(.social_message_compile(msg, msg_end))
+    glue::as_glue(.social_message_compile(msg, msg_end, last_msg))
   )
 }
 
