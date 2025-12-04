@@ -7,8 +7,10 @@
 #'
 #' @inherit .fetch_dslc_slack_channels return
 #' @export
-dslc_slack_channels <- function(refresh = FALSE,
-                                token = slack_default_token()) {
+dslc_slack_channels <- function(
+  refresh = FALSE,
+  token = slack_default_token()
+) {
   if (refresh) {
     .cache_dslc_slack_channels(token)
     return(the$slack_channels)
@@ -54,7 +56,11 @@ dslc_slack_channels <- function(refresh = FALSE,
         exclude_archived = TRUE,
         token = token
       ),
-      "id", "name", "is_private", "created", "is_general"
+      "id",
+      "name",
+      "is_private",
+      "created",
+      "is_general"
     )
   )
 }
@@ -115,13 +121,15 @@ slack_set_token <- function(key_name = "SLACK_API_TOKEN", keyring = NULL) {
 #'
 #' @return NULL (invisibly)
 #' @keywords internal
-remove_slack_reminders <- function(channel_name,
-                                   min_age_minutes = 55,
-                                   max_msgs_to_check = Inf,
-                                   token = slack_default_token(),
-                                   slack_channels = dslc_slack_channels(
-                                     token = token
-                                   )) {
+remove_slack_reminders <- function(
+  channel_name,
+  min_age_minutes = 55,
+  max_msgs_to_check = Inf,
+  token = slack_default_token(),
+  slack_channels = dslc_slack_channels(
+    token = token
+  )
+) {
   channel_id <- .slack_channel_name_to_id(channel_name, token, slack_channels)
   old_reminder_messages <- .slack_reminder_messages(
     channel_id,
@@ -133,13 +141,15 @@ remove_slack_reminders <- function(channel_name,
   .delete_slack_messages(old_reminder_messages, channel_id)
 }
 
-.slack_reminder_messages <- function(channel_id,
-                                     min_age_minutes = NULL,
-                                     max_msgs_to_check = Inf,
-                                     token = slack_default_token(),
-                                     slack_channels = dslc_slack_channels(
-                                       token = token
-                                     )) {
+.slack_reminder_messages <- function(
+  channel_id,
+  min_age_minutes = NULL,
+  max_msgs_to_check = Inf,
+  token = slack_default_token(),
+  slack_channels = dslc_slack_channels(
+    token = token
+  )
+) {
   channel_messages <- dslc_slack_channel_messages(
     channel_id,
     max_results = max_msgs_to_check,
@@ -154,20 +164,24 @@ remove_slack_reminders <- function(channel_name,
   )
 }
 
-.slack_channel_name_to_id <- function(channel_name,
-                                      token = slack_default_token(),
-                                      slack_channels = dslc_slack_channels(
-                                        token = token
-                                      )) {
+.slack_channel_name_to_id <- function(
+  channel_name,
+  token = slack_default_token(),
+  slack_channels = dslc_slack_channels(
+    token = token
+  )
+) {
   channel_name <- .validate_channel_name(channel_name, token, slack_channels)
   slack_channels$id[slack_channels$name == channel_name]
 }
 
-.validate_channel_name <- function(channel_name,
-                                   token = slack_default_token(),
-                                   slack_channels = dslc_slack_channels(
-                                     token = token
-                                   )) {
+.validate_channel_name <- function(
+  channel_name,
+  token = slack_default_token(),
+  slack_channels = dslc_slack_channels(
+    token = token
+  )
+) {
   if (channel_name %in% slack_channels$name) {
     return(channel_name)
   }
@@ -177,12 +191,14 @@ remove_slack_reminders <- function(channel_name,
   )
 }
 
-dslc_slack_channel_messages <- function(channel_id,
-                                        max_results = Inf,
-                                        token = slack_default_token(),
-                                        slack_channels = dslc_slack_channels(
-                                          token = token
-                                        )) {
+dslc_slack_channel_messages <- function(
+  channel_id,
+  max_results = Inf,
+  token = slack_default_token(),
+  slack_channels = dslc_slack_channels(
+    token = token
+  )
+) {
   slackthreads::conversations(
     channel_id,
     token = token,
@@ -191,10 +207,12 @@ dslc_slack_channel_messages <- function(channel_id,
   )
 }
 
-.filter_slack_messages <- function(channel_messages,
-                                   user = NULL,
-                                   text = NULL,
-                                   min_age_minutes = NULL) {
+.filter_slack_messages <- function(
+  channel_messages,
+  user = NULL,
+  text = NULL,
+  min_age_minutes = NULL
+) {
   purrr::keep(
     channel_messages,
     \(x) {
@@ -217,9 +235,11 @@ dslc_slack_channel_messages <- function(channel_id,
   lubridate::as_datetime(as.numeric(ts))
 }
 
-.delete_slack_message <- function(channel_id,
-                                  timestamp,
-                                  token = slack_default_token()) {
+.delete_slack_message <- function(
+  channel_id,
+  timestamp,
+  token = slack_default_token()
+) {
   slackcalls::post_slack(
     slack_method = "chat.delete",
     channel = channel_id,
@@ -228,18 +248,22 @@ dslc_slack_channel_messages <- function(channel_id,
   )
 }
 
-.delete_slack_messages <- function(messages,
-                                   channel_id,
-                                   token = slack_default_token()) {
+.delete_slack_messages <- function(
+  messages,
+  channel_id,
+  token = slack_default_token()
+) {
   for (msg in messages) {
     .delete_slack_message(channel_id, msg$ts, token = token)
   }
 }
 
-dslc_book_club_channels <- function(token = slack_default_token(),
-                                    slack_channels = dslc_slack_channels(
-                                      token = token
-                                    )) {
+dslc_book_club_channels <- function(
+  token = slack_default_token(),
+  slack_channels = dslc_slack_channels(
+    token = token
+  )
+) {
   slack_channels |>
     dplyr::filter(stringr::str_starts(name, "book_club-")) |>
     dplyr::pull(.data$name)
@@ -253,11 +277,13 @@ dslc_book_club_channels <- function(token = slack_default_token(),
 #'
 #' @return NULL (invisibly)
 #' @export
-remove_all_club_reminders <- function(min_age_minutes = 55,
-                                      token = slack_default_token(),
-                                      slack_channels = dslc_slack_channels(
-                                        token = token
-                                      )) {
+remove_all_club_reminders <- function(
+  min_age_minutes = 55,
+  token = slack_default_token(),
+  slack_channels = dslc_slack_channels(
+    token = token
+  )
+) {
   # cli::cli_inform(paste(log_now(), "Removing reminders."))
   club_channels <- dslc_book_club_channels(
     token = token,

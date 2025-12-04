@@ -15,21 +15,24 @@
     monitor_channel_id,
     max_results = 2,
     limit = 2
-  ) |> purrr::keep(
-    \(x) {
-      "bot_id" %in% names(x) &&
-        x[["bot_id"]] == "B055C7R32LV" &&
-        lubridate::as_datetime(as.numeric(x[["ts"]])) > (
-          # This probably needs to be refined. Is the quote the last 24 hours? Per
-          # calendar day?
-          lubridate::now() - lubridate::hours(24)
-        ) &&
-        x[["text"]] != "Test Notification"
-      # Eventually add more info here to check for the alerts I actually care
-      # about, but I need an example to exist to make sure I get that right. This
-      # is the only message this bot can produce right now, though, so no rush.
-    }
-  )
+  ) |>
+    purrr::keep(
+      \(x) {
+        "bot_id" %in%
+          names(x) &&
+          x[["bot_id"]] == "B055C7R32LV" &&
+          lubridate::as_datetime(as.numeric(x[["ts"]])) >
+            (
+              # This probably needs to be refined. Is the quote the last 24 hours? Per
+              # calendar day?
+              lubridate::now() - lubridate::hours(24)
+            ) &&
+          x[["text"]] != "Test Notification"
+        # Eventually add more info here to check for the alerts I actually care
+        # about, but I need an example to exist to make sure I get that right. This
+        # is the only message this bot can produce right now, though, so no rush.
+      }
+    )
 
   if (length(monitoring_channel_msgs)) {
     cli::cli_abort(
@@ -100,7 +103,9 @@ dslc_youtube_playlists <- function(n = 50L, refresh = FALSE) {
   ) |>
     httr2::req_retry(max_tries = 3) |>
     httr2::req_perform_iterative(
-      httr2::iterate_with_cursor("pageToken", \(resp) httr2::resp_body_json(resp)$nextPageToken)
+      httr2::iterate_with_cursor("pageToken", \(resp) {
+        httr2::resp_body_json(resp)$nextPageToken
+      })
     ) |>
     httr2::resps_data(\(resp) httr2::resp_body_json(resp)$items)
 
@@ -186,7 +191,7 @@ process_youtube <- function() {
           previous_duration <- working_yt_videos$uploaded_duration[[this_row]]
           if (
             status_tbl$uploaded_duration < previous_duration ||
-            this_video$status$privacyStatus == "public"
+              this_video$status$privacyStatus == "public"
           ) {
             # cli::cli_inform("{log_now()} {channel_name} is {.emph DONE!}")
 

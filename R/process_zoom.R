@@ -57,11 +57,15 @@ process_zoom <- function() {
         "America/Chicago"
       )
       meeting_date <- lubridate::date(meeting_start_dt)
-      meeting_end_dt <- lubridate::round_date(meeting_start_dt, unit = "hours") +
+      meeting_end_dt <- lubridate::round_date(
+        meeting_start_dt,
+        unit = "hours"
+      ) +
         lubridate::hours(1)
       if (meeting_end_dt < lubridate::now()) {
         this_meeting$ready_to_delete <- rep(
-          FALSE, length(this_meeting$recording_files)
+          FALSE,
+          length(this_meeting$recording_files)
         )
 
         cohort_id <- this_meeting$topic
@@ -213,20 +217,24 @@ process_zoom <- function() {
   }
 }
 
-.process_zoom_chat <- function(chat_recording_file,
-                               cohort_id,
-                               cohort_number,
-                               meeting_date,
-                               meeting_num,
-                               file_identifier,
-                               channel_name,
-                               slack_channels,
-                               zoom_token = NULL) {
+.process_zoom_chat <- function(
+  chat_recording_file,
+  cohort_id,
+  cohort_number,
+  meeting_date,
+  meeting_num,
+  file_identifier,
+  channel_name,
+  slack_channels,
+  zoom_token = NULL
+) {
   # Download chats to their folder.
   cohort_id_for_path <- stringr::str_remove_all(cohort_id, "[^A-Za-z0-9_ ]")
   chat_dir <- fs::path_home(
     "Dropbox",
-    "R", "dslc-video", "chats",
+    "R",
+    "dslc-video",
+    "chats",
     cohort_id_for_path
   )
 
@@ -284,21 +292,23 @@ process_zoom <- function() {
 }
 
 
-.process_zoom_video <- function(video_recording_file,
-                                cohort_number,
-                                cohort_id,
-                                book_abbrev,
-                                meeting_start_time,
-                                meeting_date,
-                                meeting_num,
-                                file_identifier,
-                                youtube_playlists,
-                                channel_name,
-                                working_video_dir,
-                                working_video_path,
-                                start_time = NULL,
-                                end_time = NULL,
-                                zoom_token = NULL) {
+.process_zoom_video <- function(
+  video_recording_file,
+  cohort_number,
+  cohort_id,
+  book_abbrev,
+  meeting_start_time,
+  meeting_date,
+  meeting_num,
+  file_identifier,
+  youtube_playlists,
+  channel_name,
+  working_video_dir,
+  working_video_path,
+  start_time = NULL,
+  end_time = NULL,
+  zoom_token = NULL
+) {
   # Make sure it's long enough to bother with.
   start_dt <- lubridate::as_datetime(video_recording_file$recording_start)
   end_dt <- lubridate::as_datetime(video_recording_file$recording_end)
@@ -306,7 +316,7 @@ process_zoom <- function() {
 
   if (
     duration > lubridate::minutes(10) ||
-    (length(start_time) && start_time != "00:00:00")
+      (length(start_time) && start_time != "00:00:00")
   ) {
     file_path <- withr::local_tempfile(
       pattern = paste(
@@ -479,34 +489,41 @@ process_zoom <- function() {
   }
 }
 
-.clean_zoom <- function(this_meeting,
-                        channel_name,
-                        slack_channels,
-                        zoom_token = NULL) {
+.clean_zoom <- function(
+  this_meeting,
+  channel_name,
+  slack_channels,
+  zoom_token = NULL
+) {
   remove_slack_reminders(channel_name, slack_channels = slack_channels)
 
   # Delete the recording for this meeting.
   req <- httr2::request("https://api.zoom.us/v2/") |>
     httr2::req_url_path_append("meetings", this_meeting$uuid, "recordings")
 
-  tryCatch({
-    req |>
-      httr2::req_method("DELETE") |>
-      zoomer:::.zoom_req_authenticate(token = zoom_token) |>
-      httr2::req_retry(max_tries = 3) |>
-      httr2::req_perform()
-  }, error = function(e) {
-    # Sometimes Zoom randomly puts a "/" in the uuid, which evidently doesn't work
-    # in its DELETE API. I should alert myself about those, but that's convoluted
-    # right now, so at least put something in the log.
-    cli::cli_warn(c(
-      "!",
-      "!",
-      "!",
-      "BAD UUID! MANUALLY DELETE!",
-      "!",
-      "!",
-      "!"
-    ))
-  })
+  tryCatch(
+    {
+      req |>
+        httr2::req_method("DELETE") |>
+        zoomer:::.zoom_req_authenticate(token = zoom_token) |>
+        httr2::req_retry(max_tries = 3) |>
+        httr2::req_perform()
+    },
+    error = function(e) {
+      # Sometimes Zoom randomly puts a "/" in the uuid, which evidently doesn't
+      # work in its DELETE API. I should alert myself about those, but that's
+      # convoluted right now, so at least put something in the log. Unfortunately
+      # I tried manually adding it back in after httr2 tried to un-encode the
+      # second slash, but that still doesn't work. It looks like it's a Zoom bug.
+      cli::cli_warn(c(
+        "!",
+        "!",
+        "!",
+        "BAD UUID! MANUALLY DELETE!",
+        "!",
+        "!",
+        "!"
+      ))
+    }
+  )
 }

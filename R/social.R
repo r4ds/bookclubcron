@@ -89,7 +89,9 @@
     rustlang = "🟠",
     rust = "🟠"
   )
-  lang_tags <- known_language_tags[names(known_language_tags) %in% tolower(tags)]
+  lang_tags <- known_language_tags[
+    names(known_language_tags) %in% tolower(tags)
+  ]
   if (length(lang_tags)) {
     return(unique(unname(lang_tags)))
   }
