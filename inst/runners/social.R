@@ -32,7 +32,7 @@ process_clubs_manual <- function(max_hours = 29, min_hours = 2) {
   )
 
   yesterday_clubs <- club_metadata |>
-    dplyr::left_join(this_week, by = "day_utc" ) |>
+    dplyr::left_join(this_week, by = "day_utc") |>
     dplyr::mutate(
       datetime_utc = lubridate::make_datetime(
         year = lubridate::year(.data$date_utc),
@@ -40,9 +40,17 @@ process_clubs_manual <- function(max_hours = 29, min_hours = 2) {
         day = lubridate::day(.data$date_utc),
         hour = .data$hour_utc
       ),
-      datetime_chicago = lubridate::with_tz(.data$datetime_utc, "America/Chicago")
+      datetime_chicago = lubridate::with_tz(
+        .data$datetime_utc,
+        "America/Chicago"
+      )
     ) |>
-    dplyr::select("cohort_id", "signup_ws_id", "datetime_chicago", "book_title") |>
+    dplyr::select(
+      "cohort_id",
+      "signup_ws_id",
+      "datetime_chicago",
+      "book_title"
+    ) |>
     dplyr::filter(
       dplyr::between(
         .data$datetime_chicago,
@@ -67,7 +75,11 @@ process_clubs_manual <- function(max_hours = 29, min_hours = 2) {
     cohort_id <- yesterday_clubs$cohort_id[[club_n]]
     do_club_update <- usethis::ui_yeah(
       "Update {cohort_id}?",
-      "Yes", "No", 1, 1, FALSE
+      "Yes",
+      "No",
+      1,
+      1,
+      FALSE
     )
     if (do_club_update) {
       ws_id <- yesterday_clubs$signup_ws_id[[club_n]]
