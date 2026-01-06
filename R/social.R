@@ -14,7 +14,11 @@
 }
 
 .social_message_end <- function() {
-  "Visit https://dslc.video for hours of new #DataScience videos every week!"
+  paste(
+    # "Visit https://dslc.video for hours of new #DataScience videos every week!",
+    "Support the Data Science Learning Community at https://patreon.com/DSLC",
+    sep = "\n\n"
+  )
 }
 
 .social_message_minimize <- function(msgs) {
