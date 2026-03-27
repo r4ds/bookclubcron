@@ -69,6 +69,10 @@
   if ("databs" %in% names(tags)) {
     tags[["databs"]] <- "dataBS"
   }
+  if (any(c("rustlang", "rust") %in% names(tags))) {
+    tags[["rust"]] <- "RustLang"
+    tags[["rustlang"]] <- "RustLang"
+  }
   return(unique(unname(tags)))
 }
 
