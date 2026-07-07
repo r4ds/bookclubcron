@@ -35,7 +35,7 @@ bsky_message_randoms <- function(...) {
 }
 
 .bsky_message_archive_start <- function() {
-  return("From the DSLC aRchives:")
+  return("From the DSLC video aRchives:")
 }
 
 .bsky_random_video_message <- function() {
