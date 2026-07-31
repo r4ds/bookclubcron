@@ -1,7 +1,7 @@
 pkgload::load_all()
 
 create_task <- purrr::partial(
-  taskscheduleR::taskscheduler_create, 
+  taskscheduleR::taskscheduler_create,
   Rexe = utils::shortPathName(
     file.path(Sys.getenv("R_HOME"), "bin", "Rscript.exe")
   ),
@@ -14,6 +14,9 @@ tasks <- tibble::tibble(
   script = c("clubs.R", "clear_reminders.R"),
   start_time_minutes = c(30, 0)
 )
+
+existing_tasks <- taskscheduleR::taskscheduler_ls() |>
+  suppressWarnings()
 
 purrr::pwalk(
   tasks,
@@ -29,7 +32,9 @@ purrr::pwalk(
       ":",
       stringr::str_pad(start_time_minutes, 2, pad = "0")
     )
-    taskscheduleR::taskscheduler_delete(task)
+    if (task %in% existing_tasks$TaskName) {
+      taskscheduleR::taskscheduler_delete(task)
+    }
     create_task(
       taskname = task,
       rscript = script_path,
