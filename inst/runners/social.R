@@ -160,6 +160,6 @@ process_clubs_manual <- function(max_hours = 29, min_hours = 2) {
 
 process_clubs_manual()
 # process_clubs_manual(1,1)
-# process_clubs_manual(96, 1)
+# process_clubs_manual(6 * 24, 1)
 
 rm(process_clubs_manual)
