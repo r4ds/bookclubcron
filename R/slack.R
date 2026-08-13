@@ -265,7 +265,7 @@ dslc_book_club_channels <- function(
   )
 ) {
   slack_channels |>
-    dplyr::filter(stringr::str_starts(name, "book_club-")) |>
+    dplyr::filter(stringr::str_starts(.data$name, "book_club-")) |>
     dplyr::pull(.data$name)
 }
 

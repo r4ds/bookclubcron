@@ -93,7 +93,7 @@ dslc_youtube_playlists <- function(n = 50L, refresh = FALSE) {
 #' @keywords internal
 .fetch_dslc_youtube_playlists <- function(n) {
   # TODO: {youtubeR} endpoint
-  raw_playlists <- youtubeR:::.prepare_request(
+  raw_playlists <- youtubeR::prepare_request(
     endpoint = "playlists",
     query = list(
       part = "snippet",

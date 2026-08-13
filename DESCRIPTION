@@ -41,7 +41,7 @@ Suggests:
     testthat (>= 3.0.0)
 Remotes:
     jonthegeek/zoomer,
-    kevin-m-kent/youtubeR,
+    kevin-m-kent/youtubeR#26,
     yonicd/slackcalls,
     yonicd/slackposts,
     yonicd/slackteams,

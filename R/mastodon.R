@@ -28,7 +28,7 @@ mast_message_randoms <- function(...) {
 }
 
 .mast_message_archive_start <- function() {
-  "From the @DSLC :rstats:​chives:"
+  "From the @DSLC :rstats:\u200Bchives:"
 }
 
 .mast_random_video_message <- function() {
