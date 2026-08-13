@@ -9,3 +9,6 @@
 ^pkgdown$
 ^README\.Rmd$
 ^R-raw$
+^\.httr-oauth$
+^[.]?air[.]toml$
+^\.vscode$

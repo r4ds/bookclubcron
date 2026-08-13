@@ -1,38 +1,45 @@
-library(taskscheduleR)
-clubs_script <- system.file("runners", "clubs.R", package = "bookclubcron")
+pkgload::load_all()
 
-taskscheduler_create(
-  taskname = "dslc_clubs",
-  rscript = clubs_script,
+create_task <- purrr::partial(
+  taskscheduleR::taskscheduler_create,
+  Rexe = utils::shortPathName(
+    file.path(Sys.getenv("R_HOME"), "bin", "Rscript.exe")
+  ),
   schedule = "HOURLY",
-  # schedule = "ONCE",
-  starttime = "15:30",
   startdate = format(Sys.Date(), "%m/%d/%Y")
 )
-# taskscheduler_delete(taskname = "dslc_clubs")
 
-
-tasks <- taskscheduler_ls() |>
-  tibble::as_tibble()
-
-tasks |>
-  dplyr::filter(TaskName == "dslc_clubs") |>
-  dplyr::glimpse() |>
-  dplyr::pull("Task To Run")
-
-
-reminder_script <- system.file(
-  "runners",
-  "clear_reminders.R",
-  package = "bookclubcron"
+tasks <- tibble::tibble(
+  task = c("dslc_clubs", "dslc_clear_reminders"),
+  script = c("clubs.R", "clear_reminders.R"),
+  start_time_minutes = c(30, 0)
 )
 
-taskscheduler_create(
-  taskname = "dslc_clear_reminders",
-  rscript = reminder_script,
-  schedule = "HOURLY",
-  # schedule = "ONCE",
-  starttime = "15:00",
-  startdate = format(Sys.Date(), "%m/%d/%Y")
+existing_tasks <- taskscheduleR::taskscheduler_ls() |>
+  suppressWarnings()
+
+purrr::pwalk(
+  tasks,
+  function(task, script, start_time_minutes) {
+    script_path <- system.file("runners", script, package = "bookclubcron")
+    start_time <- lubridate::now()
+    lubridate::minute(start_time) <- start_time_minutes
+    if (start_time <= lubridate::now()) {
+      start_time <- start_time + lubridate::hours(1)
+    }
+    start_time_formatted <- paste0(
+      stringr::str_pad(lubridate::hour(start_time), 2, pad = "0"),
+      ":",
+      stringr::str_pad(start_time_minutes, 2, pad = "0")
+    )
+    if (task %in% existing_tasks$TaskName) {
+      taskscheduleR::taskscheduler_delete(task)
+    }
+    create_task(
+      taskname = task,
+      rscript = script_path,
+      starttime = start_time_formatted
+    )
+    configure_task_properties(task)
+  }
 )
-# taskscheduler_delete(taskname = "dslc_clubs")

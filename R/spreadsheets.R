@@ -21,7 +21,9 @@ process_announcements <- function() {
       ) |>
         purrr::list_rbind()
     )
-  stop("Sort out a function for this. Post to the appropriate Slack channel. Watch for 'SKIP', etc.")
+  stop(
+    "Sort out a function for this. Post to the appropriate Slack channel. Watch for 'SKIP', etc."
+  )
 }
 
 .active_clubs <- function() {
@@ -41,7 +43,8 @@ process_announcements <- function() {
         lubridate::as_datetime(
           .data$start_date,
           tz = "America/Chicago"
-        ) < lubridate::now()
+        ) <
+          lubridate::now()
       ) |>
       dplyr::select(
         "cohort_id",
@@ -72,7 +75,10 @@ process_announcements <- function() {
     )$result |>
       dplyr::select(
         tidyselect::any_of(c(
-          "topic", "chapter", "date", "presenter"
+          "topic",
+          "chapter",
+          "date",
+          "presenter"
         ))
       ) |>
       dplyr::mutate(
@@ -93,4 +99,3 @@ process_announcements <- function() {
     email = "jonthegeek@gmail.com"
   )
 }
-
