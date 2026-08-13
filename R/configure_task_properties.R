@@ -1,5 +1,6 @@
 configure_task_properties <- function(task_name) {
-  ps_script_content <- glue::glue("
+  ps_script_content <- glue::glue(
+    "
     $taskName = '{task_name}';
     try {{
       $task = Get-ScheduledTask -TaskName $taskName -ErrorAction Stop;
@@ -15,11 +16,12 @@ configure_task_properties <- function(task_name) {
       Write-Error $_.Exception.Message;
       Read-Host 'Press Enter to exit'; # Keep window open if it errors
     }}
-  ")
-  
+  "
+  )
+
   ps_file <- tempfile(fileext = ".ps1")
   writeLines(ps_script_content, ps_file)
-  
+
   run_command <- glue::glue(
     "Start-Process powershell -Verb RunAs -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File \"{ps_file}\"'"
   )

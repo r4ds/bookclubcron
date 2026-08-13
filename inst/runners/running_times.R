@@ -18,7 +18,9 @@ for (i in seq_along(youtube_playlists)) {
   )
   video_ids <- playlist_items$items |>
     purrr::keep(\(item) {
-      publish_year <- lubridate::ymd_hms(item$contentDetails$videoPublishedAt) |>
+      publish_year <- lubridate::ymd_hms(
+        item$contentDetails$videoPublishedAt
+      ) |>
         lubridate::year()
       item$kind == "youtube#playlistItem" && publish_year == 2024
     }) |>
@@ -61,6 +63,6 @@ running_times <- purrr::map(
   }
 )
 total_seconds <- sum(unlist(running_times))
-total_minutes <- total_seconds/60
-total_hours <- total_seconds/60/60
-total_days <- total_seconds/60/60/24
+total_minutes <- total_seconds / 60
+total_hours <- total_seconds / 60 / 60
+total_days <- total_seconds / 60 / 60 / 24
