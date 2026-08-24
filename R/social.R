@@ -87,15 +87,15 @@
 .tags_to_bullets <- function(tags) {
   tags <- .clean_tags(tags)
   known_language_tags <- c(
-    rstats = "\u1F535",
-    pydata = "\u1F7E2",
-    python = "\u1F7E2",
-    julia = "\u1F7E3",
-    julialang = "\u1F7E3",
-    js = "\u1F7E1",
-    javascript = "\u1F7E1",
-    rustlang = "\u1F7E0",
-    rust = "\u1F7E0"
+    rstats = emoji::emoji("blue circle"),
+    pydata = emoji::emoji("green circle"),
+    python = emoji::emoji("green circle"),
+    julia = emoji::emoji("purple circle"),
+    julialang = emoji::emoji("purple circle"),
+    js = emoji::emoji("yellow circle"),
+    javascript = emoji::emoji("yellow circle"),
+    rustlang = emoji::emoji("orange circle"),
+    rust = emoji::emoji("orange circle")
   )
   lang_tags <- known_language_tags[
     names(known_language_tags) %in% tolower(tags)
@@ -103,7 +103,7 @@
   if (length(lang_tags)) {
     return(unique(unname(lang_tags)))
   }
-  return("\u1F534")
+  return(emoji::emoji("red circle"))
 }
 
 .sum_nchar <- function(...) {
